@@ -39,6 +39,7 @@ int main (int argc, char *argv[])
 		cout << "First: " << first << " Second: " << second << endl;
 	}
 
+	file.close();
 	return 0;
 }
 
