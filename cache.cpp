@@ -5,9 +5,13 @@
 //
 //============================================================
 
+//Constants:
+const int ASSOCIATIVITY = 8;
+const int NUMSETS = 2^15;
+
 class Cache {
 	public:
-	void Cache(){
+	Cache(){
 		for(int x = 0; x<NUMSETS; x++){
 			pLRU[x][0][0] = 0;
 			pLRU[x][0][1] = 0;
@@ -32,11 +36,6 @@ class Cache {
 
 
 	private:
-
-	//Constants:
-	const int ASSOCIATIVITY = 8;
-	const int NUMSETS = 2^15;
-
 	//Variables
 	bool dirty [NUMSETS][ASSOCIATIVITY];
 	bool valid [NUMSETS][ASSOCIATIVITY];
@@ -44,4 +43,4 @@ class Cache {
 
 	bool pLRU [NUMSETS][2][2];
 
-}
+};
