@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
 		cin >> debugMode;
 	}
 	else if (argv[1] == "-help"){
-		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter a '1' as thwe second argument to enter debug mode.";
+		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter a '1' as the second argument to enter debug mode.";
 	}
 	else{
 		filename = argv[1];
