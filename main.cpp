@@ -21,15 +21,26 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
+	//Variables
+	bool debugMode = 0;
+
 	//Get test file
 	ifstream file;
 	string filename;
 	if (argc < 2){ //No filename provided.
 		cout << "Please enter filename:" << endl;
 		cin >> filename;
+		cout << "Debug mode? (1/0)" << endl;
+		cin >> debugMode;
+	}
+	else if (argv[1] == "-help"){
+		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter a '1' as thwe second argument to enter debug mode.";
 	}
 	else{
 		filename = argv[1];
+		if (argc > 3){
+			debugMode = 1;
+		}
 	}
 	file.open(filename);
 	if (!file){
