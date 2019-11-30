@@ -12,6 +12,10 @@ const int NUMSETS = 2^15;
 class Cache{
 public:
 	Cache(){ //Constructor
+		clearCache();
+	}
+
+	void clearCache(){
 		for (int x = 0; x < NUMSETS; x++){
 			pLRU[x][0] = 0;
 			pLRU[x][1] = 0;
@@ -22,6 +26,10 @@ public:
 				tag[x][y] = 0;
 			}
 		}
+		reads = 0;
+		writes = 0;
+		hits = 0;
+		misses = 0;
 	}
 
 	void read(){
@@ -79,6 +87,8 @@ private:
 	bool pLRU[NUMSETS][4];
 
 	//Stats
+	int reads = 0;
+	int writes = 0;
 	int hits = 0;
 	int misses = 0;
 };
