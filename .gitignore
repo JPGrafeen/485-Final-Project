@@ -29,6 +29,7 @@
 *.dylib
 
 # Executables
+cacheSim
 *.exe
 *.out
 *.app
