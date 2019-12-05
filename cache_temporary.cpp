@@ -209,8 +209,8 @@ private:
 
 //name: CheckForMatch
 //inputs:	index (cache index number)
-//			tag (tag to compare to)
-//			way (pointer so that it can potentialy be modified)
+//		tag (tag to compare to)
+//		way (pointer so that it can potentialy be modified)
 //desc: check for a tag match at a given index
 //retn: bool
 bool CheckForMatch(unsigned int index, unsigned int tag, unsigned int *way)
@@ -232,7 +232,7 @@ bool CheckForMatch(unsigned int index, unsigned int tag, unsigned int *way)
 		}
 	}
 
-	return match_stat;
+	return match;
 }
 
 
