@@ -7,7 +7,7 @@ Assumptions:
 
 
 Cache:
-	Cache is 16MiB, uses 64B lines, and is 8-way set associative using 32'b addresses.
+	Cache is 16MiB, uses 64B lines, and is 8-way set associative using an undefined address size.
 		64B * 8 = 256B/index
 		16MiB / 256B = 64Ki indexs   (65,536)
 
@@ -24,12 +24,53 @@ Cache:
 Programming Container:
 	struct array of [index][way]
 
-	struct my_cache{
-		boolean valid
-        boolean dirty
-        char    mesi
-        int32t  tag
+	struct Tag_Array_Entry{
+	    boolean Valid,
+	    boolean Dirty,
+	    char MESI,
+	    unsigned int Tag
 	}
+
+Enums: 
+
+    enum TraceOp{
+        TRC_L1_DATA_READ     = 0,
+        TRC_L1_DATA_WRITE    = 1,
+        TRC_L1_INST_READ     = 2,
+        TRC_SNP_INVALIDATE   = 3,
+        TRC_SNP_READ         = 4,
+        TRC_SNP_WRITE        = 5,
+        TRC_SNP_RWIM         = 6,
+        TRC_CLR_CACHE        = 8,
+        TRC_PRNT_CACHE       = 9
+    }
+
+    enum BusOp{
+        BUS_READ   = 1,
+        BUS_WRITE  = 2,
+        BUS_INV    = 3,
+        BUS_RWIM   = 4
+    }
+
+    enum SnoopOp{
+        SNP_NOHIT  = 0,
+        SNP_HIT    = 1,
+        SNP_HITM   = 2
+    }
+
+    enum L1L2MSG{
+        MSG_GETLINE    = 1,
+        MSG_SENDLINE   = 2,
+        MSG_INV_LINE   = 3,
+        MSG_EVICTLINE  = 4
+    }
+
+    struct Tag_Array_Entry{
+        bool         Valid,      // Valid bit, data is able to be read or modified
+        bool         Dirty,      // Dirty bit, data has been modified
+        char         MESI,       // 1 hot encoding of the MESI states using 8'b vector
+        unsigned int Tag         // Data tag
+    }
 
 
 Traces:
@@ -54,17 +95,18 @@ Traces:
  	 - The trace file needs to be passed to the program as a command line argument (argv)
  	 - main() will error check if the trace file exists, if so, open it and begin reading line by line until eof. 
  	 - For each line in the trace file the operation and address needs to be translated and the appropriate function called
- 		- There should be a function for all 10 operations
- 			- L1_data_read(int32t address)
- 			- L1_data_write(int32t address)
- 			- L1_inst_read(int32t address)
- 			- Bus_Invalidate(int32t address)
- 			- Bus_Read(int32t address)
- 			- Bus_Write(int32t address)
- 			- Bus_Read_WIM(int32t address)
+ 		- There should be a function for all 9 operations
+ 			- L1_Data_Read(unsigned int address, Cache* this)
+ 			- L1_Data_Write(unsigned int address, Cache* this)
+ 			- L1_Inst_Read(unsigned int address, Cache* this)
+ 			- SNP_Invalidate(unsigned int address, Cache* this)
+ 			- SNP_Read(unsigned int address, Cache* this)
+ 			- SNP_Write(unsigned int address, Cache* this)
+ 			- SNP_RWIM(unsigned int address, Cache* this)
  			- Clear_Cache()
  			- Print_Cache()
-		 	 	
+
+
  	 - For each line in the trace file the operation needs to be reported if in the correct "mode"
  	 	- void BusOperation     // Used to simulate a bus operation and to capture the snoop results of other LLC
  	 	- char GetSnoopResult   // Used to simulate the reporting of snoop results by other caches
@@ -72,6 +114,12 @@ Traces:
  	 	- void MessageToCache   // Used to simulate communication to our upper level cache. ex: L2 eviction "back invalidation"
 
  	 		- Each of these functions have an example stub in the project specification pdf.
+ 	 		- The print statement styling should be preserved in the switch from C to C++.
+
+Pseudo-PRLU:
+
+	The same function used in Homework 5 should be updated for 8-way set associativity and added as
+		void update_PLRU(unsigned int Index, unsigned int Way)
 
 Output:
 
@@ -86,12 +134,12 @@ Output:
 		- Increment each member during the appropriate function call for Cache Read and Write.
 		- Each Read and Write operation should record both that it was a Read or Write, and if it was a Hit or Miss.
 
-		ex: int32t m_CacheRead
-			int32t m_CacheWrite
-			int32t m_CacheHit
-			int32t m_CacheMiss
+		ex: unsigned int m_CacheRead
+			unsigned int m_CacheWrite
+			unsigned int m_CacheHit
+			unsigned int m_CacheMiss
 
-			int32t cacheratio()
+			unsigned int Cache_Ratio()
 			{
 				return (m_CacheHit / (m_CacheHit + m_CacheMiss));
 			}
