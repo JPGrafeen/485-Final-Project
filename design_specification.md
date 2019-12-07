@@ -5,6 +5,9 @@ Assumptions:
 
 	These assumptions will help maintain inclusivity.
 
+	Professor assumptions:
+		When inserting a line in the cache that you’ll fill an empty line from the lowest numbered way first.
+
 
 Cache:
 	Cache is 16MiB, uses 64B lines, and is 8-way set associative using 32'b addresses.
@@ -33,9 +36,7 @@ Programming Container:
 
 
 Traces:
-	The testbench will read events from a text file of the following format:
-
-		n address
+	The testbench will read events from a text file of the following format:    n address
 
 	where n is the 'operation' (Communication, Snoop Result, or Debug Information)
 
@@ -54,7 +55,7 @@ Traces:
  	 - The trace file needs to be passed to the program as a command line argument (argv)
  	 - main() will error check if the trace file exists, if so, open it and begin reading line by line until eof. 
  	 - For each line in the trace file the operation and address needs to be translated and the appropriate function called
- 		- There should be a function for all 10 operations
+ 		- There should be a function for all 9 operations
  			- L1_data_read(int32t address)
  			- L1_data_write(int32t address)
  			- L1_inst_read(int32t address)
@@ -160,7 +161,8 @@ MESI Protocol:
 	- For all operations, update Dirty and Valid bits appropriately
 
 	- For Operation 0 'read request from L1 data cache'
-		- on a hit, stay in current MESI state
+		- on a hit, 
+			- stay in current MESI state
 		- on a miss,
 			- simulate BusOperation for READ
 				- if GetSnoopResult returns HITM or HIT update state to S
@@ -177,11 +179,107 @@ MESI Protocol:
 			- state == I
 				- Error State - can't have hit and Invalid
 		- on a miss,
+			- move to M (shoulda been in I)
+	- For Operation 2 'read request from L1 instruction cache'
+		- on a hit, 
+			- stay in current MESI state
+		- on a miss,
+			- simulate BusOperation for READ
+				- if GetSnoopResult returns HITM or HIT update state to S
+					- else update state to E
+	- For Operation 3 'snooped invalidate command'
+		- on a hit,
+			- state == M
+				- Error State - You should have been EXCLUSIVE
+			- state == E
+				- Error State - You should have been EXCLUSIVE
+			- state == S
+				- simulate a HIT
+				- move to I
+				- simulate INVALIDATELINE
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- Stay in I, all others are Error States
+	- For Operation 4 'snooped read request'
+		- on a hit,
+			- state == M
+				- move to S
+			- state == E
+				- move to S
+			- state == S
+				- stay in S
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- stay in I
+	- For Operation 5 'snooped write request'
+		- on a hit,
+			- state == M
+				- Error State - You should have been EXCLUSIVE
+			- state == E
+				- Error State - You should have been EXCLUSIVE
+			- state == S
+				- move to I
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- stay in I
+	- For Operation 6 'snooped read with intent to modify request'
+		- on a hit,
+			- state == M
+				- move to I
+			- state == E
+				- move to I
+			- state == S
+				- move to I
+			- state == I
+				- Error State - can't have a hit and Invalid
+		- on a miss,
+			- stay in I
+
+
+
+
+Combined Cache operations
+
+	- For Operation 0 'read request from L1 data cache'
+		- on a hit, 
+			- increment m_CacheHit
+			- increment m_CacheRead
+			- stay in current MESI state
+		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheRead
+			- simulate BusOperation for READ
+				- if GetSnoopResult returns HITM or HIT update state to S
+					- else update state to E
+	- For Operation 1 'write request from L1 data cache'
+		- on a hit,
+			- increment m_CacheHit
+			- increment m_CacheWrite
+			- state == M
+				- stay in M
+			- state == E
+				- move to M
+			- state == S
+				- move to M
+				- simulate BusOperation for INVALIDATE
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheWrite
 			- simulate BusOperation for RWIM
 			- move to M (shoulda been in I)
 	- For Operation 2 'read request from L1 instruction cache'
-		- on a hit, stay in current MESI state
+		- on a hit, 
+			- increment m_CacheHit
+			- increment m_CacheRead
+			- stay in current MESI state
 		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheRead
 			- simulate BusOperation for READ
 				- if GetSnoopResult returns HITM or HIT update state to S
 					- else update state to E
@@ -239,14 +337,6 @@ MESI Protocol:
 				- Error State - can't have a hit and Invalid
 		- on a miss,
 			- stay in I
-
-
-
-
-
-
-
-
 
 
 
