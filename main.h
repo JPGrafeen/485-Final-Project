@@ -9,8 +9,9 @@
 */
 
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <string>
+#include <cstdint>
 #include <iostream>
 #include <fstream>
 
@@ -63,13 +64,6 @@ enum L1L2MSG{
 //			}
 //		}
 //	}
-//}
-
-//void printStats(){
-//	cout <<  "Reads: " << reads << endl;
-//	cout <<  "Writes: " << writes << endl;
-//	cout <<  "Hits: " << hits << endl;
-//	cout <<  "Misses: " << misses << endl;
 //}
 
 //void updatePLRU(int set, int way){
