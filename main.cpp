@@ -26,23 +26,16 @@ int main (int argc, char *argv[])
 		return 2;
 	}
 
-	// Parse Arguments
-	string filename = argv[1];
-
-	if (filename == "--help")
-	{
-		cout << "Cache Simulator." << endl;
-		cout << "Takes file name/path of a trace file as the first argument." << endl;
-		cout << "Enter '--debug' as the second argument to enter debug mode." << endl << endl;
-		return 0;
-	}
-
 	// create cache object and initialize.
 	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
 	Cache my_cache(*TagArray);
 
+
+	// Parse Arguments
+	string filename;
+	string mode;
 	if (argc < 2)
-	{ //No filename provided.
+	{ // No filename provided.
 		bool mode;
 		cout << "Please enter filename:" << endl;
 		cin >> filename;
@@ -50,10 +43,21 @@ int main (int argc, char *argv[])
 		cin >> mode;
 		my_cache.Set_DebugMode(mode);
 	}
-	else
+	else if (argv[1])
 	{
-		string mode = argv[2];
-		my_cache.Set_DebugMode((mode == "--debug" ? true : false));
+		filename = argv[1];
+		if (filename == "--help")
+		{
+			cout << "Cache Simulator." << endl;
+			cout << "Takes file name/path of a trace file as the first argument." << endl;
+			cout << "Enter '--debug' as the second argument to enter debug mode." << endl << endl;
+			return 0;
+		}
+		else if (argv[2])
+		{
+			mode = argv[2];
+			my_cache.Set_DebugMode((mode == "--debug" ? true : false));
+		}
 	}
 
 
