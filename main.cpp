@@ -31,7 +31,9 @@ int main (int argc, char *argv[])
 
 	if (filename == "--help")
 	{
-		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter '--debug' as the second argument to enter debug mode.";
+		cout << "Cache Simulator." << endl;
+		cout << "Takes file name/path of a trace file as the first argument." << endl;
+		cout << "Enter '--debug' as the second argument to enter debug mode." << endl << endl;
 		return 0;
 	}
 
