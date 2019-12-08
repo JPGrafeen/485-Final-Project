@@ -53,7 +53,7 @@ int main (int argc, char *argv[])
 	else
 	{
 		string mode = argv[2];
-		my_cache.Set_DebugMode(mode == "--debug");
+		my_cache.Set_DebugMode((mode == "--debug" ? true : false));
 	}
 
 
