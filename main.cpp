@@ -26,13 +26,17 @@ int main (int argc, char *argv[])
 		return 2;
 	}
 
-	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
-
-	Cache my_cache(*TagArray);
-
 	// Parse Arguments
-	string filename;
-	if (argc < 2){ //No filename provided.
+	string filename = argv[1];
+
+	if (filename == "--help")
+	{
+		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter '--debug' as the second argument to enter debug mode.";
+		return 0;
+	}
+
+	if (argc < 2)
+	{ //No filename provided.
 		bool mode;
 		cout << "Please enter filename:" << endl;
 		cin >> filename;
@@ -40,17 +44,20 @@ int main (int argc, char *argv[])
 		cin >> mode;
 		my_cache.Set_DebugMode(mode);
 	}
-	else if (argv[1] == "--help"){
-		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter '--debug' as the second argument to enter debug mode.";
+	else
+	{
+		string mode = argv[2];
+		my_cache.Set_DebugMode(mode == "--debug");
 	}
-	else{
-		filename = argv[1];
-		my_cache.Set_DebugMode(argv[2] == "--debug");
-	}
+
 
 	// Open file
 	ifstream file (filename);
-	if (file.is_open()){
+	if (file.is_open())
+	{
+		Cache::Tag_Array TagArray[NofIndex][CacheAssc];
+		Cache my_cache(*TagArray);
+
 		// Read line by line until eof and perform the trace operation for the trace address
 		string sOperation;
 		string sAddress;
@@ -64,33 +71,33 @@ int main (int argc, char *argv[])
 
 			switch(eOperation)
 			{
-			case TRC_L1_DATA_READ:
-				my_cache.L1_Data_Read(Address);
-				break;
-			case TRC_L1_DATA_WRITE:
-				my_cache.L1_Data_Write(Address);
-				break;
-			case TRC_L1_INST_READ:
-				my_cache.L1_Inst_Read(Address);
-				break;
-			case TRC_SNP_INVALIDATE:
-				my_cache.SNP_Invalidate(Address);
-				break;
-			case TRC_SNP_READ:
-				my_cache.SNP_Read(Address);
-				break;
-			case TRC_SNP_WRITE:
-				my_cache.SNP_Write(Address);
-				break;
-			case TRC_SNP_RWIM:
-				my_cache.SNP_RWIM(Address);
-				break;
-			case TRC_CLR_CACHE:
-				my_cache.Clear_Cache();
-				break;
-			case TRC_PRNT_CACHE:
-				my_cache.Print_Cache();
-				break;
+				case TRC_L1_DATA_READ:
+					my_cache.L1_Data_Read(Address);
+					break;
+				case TRC_L1_DATA_WRITE:
+					my_cache.L1_Data_Write(Address);
+					break;
+				case TRC_L1_INST_READ:
+					my_cache.L1_Inst_Read(Address);
+					break;
+				case TRC_SNP_INVALIDATE:
+					my_cache.SNP_Invalidate(Address);
+					break;
+				case TRC_SNP_READ:
+					my_cache.SNP_Read(Address);
+					break;
+				case TRC_SNP_WRITE:
+					my_cache.SNP_Write(Address);
+					break;
+				case TRC_SNP_RWIM:
+					my_cache.SNP_RWIM(Address);
+					break;
+				case TRC_CLR_CACHE:
+					my_cache.Clear_Cache();
+					break;
+				case TRC_PRNT_CACHE:
+					my_cache.Print_Cache();
+					break;
 			}
 		}
 
