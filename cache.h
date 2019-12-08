@@ -23,33 +23,33 @@ public:
     // Destructor
     ~Cache(){
         Clear_Cache();
+    }
+
+
+    struct Tag_Array_Entry{
+        bool         Valid;      // Valid bit, data is able to be read or modified
+        bool         Dirty;      // Dirty bit, data has been modified
+        char         MESI;       // 1 hot encoding of the MESI states using 8'b vector
+        unsigned int Tag;         // Data tag
     };
-
-
-struct Tag_Array_Entry{
-    bool         Valid,      // Valid bit, data is able to be read or modified
-    bool         Dirty,      // Dirty bit, data has been modified
-    char         MESI,       // 1 hot encoding of the MESI states using 8'b vector
-    unsigned int Tag         // Data tag
-}
 
 private:
     void L1_Data_Read(unsigned int Address);
     void L1_Data_Write(unsigned int Address);
     void L1_Inst_Read(unsigned int Address);
-    void Bus_Invalidate(unsigned int Address);
-    void Bus_Read(unsigned int Address);
-    void Bus_Write(unsigned int Address);
-    void Bus_RWIM(unsigned int Address);
+    void SNP_Invalidate(unsigned int Address);
+    void SNP_Read(unsigned int Address);
+    void SNP_Write(unsigned int Address);
+    void SNP_RWIM(unsigned int Address);
 
     void Clear_Cache();
     void Print_Cache();
 
     void update_PLRU(unsigned int Index, unsigned int Way);
 
-    unsigned int Get_Tag(unsigned int Address);
-    unsigned int Get_Index(unsigned int Address);
-    unsigned int Get_Offset(unsigned int Address);
+    unsigned int Get_Tag(unsigned int Address){ return (Address>>22); }
+    unsigned int Get_Index(unsigned int Address){ return ((Address && 0x003FFFC0) >> 6); }
+    unsigned int Get_Offset(unsigned int Address){ return (Address && 0x0000003F); }
 
     void BusOperation(char BusOp, unsigned int Address, char* SnoopResult);
     char GetSnoopResult(unsigned int Address);
@@ -66,4 +66,4 @@ private:
     unsigned int m_CacheWrite;
     unsigned int m_CacheHit;
     unsigned int m_CacheMiss;
-}
+};

@@ -103,36 +103,6 @@ void Print_Cache()
 
 
 //--------------------------------------------------------------------------------
-// Description: Returns the Tag portion of the given address
-//
-//--------------------------------------------------------------------------------
-unsigned int Get_Tag(unsigned int Address)
-{
-
-}
-
-
-//--------------------------------------------------------------------------------
-// Description: Returns the Index portion of the given address
-//
-//--------------------------------------------------------------------------------
-unsigned int Get_Index(unsigned int Address)
-{
-
-}
-
-
-//--------------------------------------------------------------------------------
-// Description: Returns the Byte Offset portion of the given address
-//
-//--------------------------------------------------------------------------------
-unsigned int Get_Offset(unsigned int Address)
-{
-
-}
-
-
-//--------------------------------------------------------------------------------
 // Description: Used to simulate a bus operation and to capture the snoop results
 //              of last level caches of other processors
 //
@@ -156,15 +126,24 @@ char GetSnoopResult(unsigned int Address)
 {
     // Mask the Address to remove all but the two Least Significant Bits
     int8_t twoLSB = Address && 0x03;
+    char SnoopResult;
     switch(twoLSB)
     {
         case 0:
-            return 0x01;
+            SnoopResult = 0x01;
         case 1:
-            return 0x02;
+            SnoopResult = 0x02;
         default:
-            return 0x00;
+            SnoopResult = 0x00;
     }
+
+    /*
+    if the least two significant bits of the address are 00 then the other processors are reporting a HIT
+    if the least two significant bits of the address are 01 then the other processors are reporting a HITM
+    if the least two significant bits of the address are 1x then the other processors are not reporting a HIT or HITM
+    */
+
+    return SnoopResult;
 }
 
 

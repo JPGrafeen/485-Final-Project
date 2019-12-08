@@ -13,14 +13,20 @@
 // Uses write allocate, MESI, and psuedo-LRU.
 
 #include "main.h"
-#include "cache.cpp"
+#include "cache.h"
 
 using namespace std;
 
 int main (int argc, char *argv[])
 {
+	// 32b addresses assumed from code stub in project guide.
+	if (sizeof(unsigned int) != 4)
+	{
+		cout << "Incompatible compiler used" << endl;
+		return 3;
+	}
 
-	Cache my_cache = new Cache;
+	Cache my_cache;
 
 	Tag_Array_Entry Tag_Array[NofIndex][CacheAssc];
 
@@ -31,7 +37,7 @@ int main (int argc, char *argv[])
 	else
 	{
 		cout << "Error Creating Cache" << endl;
-		return 1
+		return 2;
 	}
 
 	// Parse Arguments
@@ -47,7 +53,7 @@ int main (int argc, char *argv[])
 	}
 	else{
 		filename = argv[1];
-		if (argv[3] == "--debug"){
+		if (argv[2] == "--debug"){
 			m_DebugMode = true;
 		}
 	}
@@ -103,6 +109,12 @@ int main (int argc, char *argv[])
 			break;
 		}
 	}
+
+	cout <<  "Reads: "  << my_cache.m_CacheRead  << endl;
+	cout <<  "Writes: " << my_cache.m_CacheWrite << endl;
+	cout <<  "Hits: "   << my_cache.m_CacheHit   << endl;
+	cout <<  "Misses: " << my_cache.m_CacheMiss  << endl;
+	cout <<  "Ratio: "  << Cache_Ratio()         << endl;
 
 	file.close();
 	return 0;
