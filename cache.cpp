@@ -322,7 +322,21 @@ void Cache::MessageToCache(char Message, unsigned int Address)
 }
 
 
+//--------------------------------------------------------------------------------
+// Description: Returns the Cache hit ratio
+//
+//--------------------------------------------------------------------------------
+float Cache::Get_CacheRatio()
+{
+	// Dividing by zero releases Chuthulu
+	if ( m_CacheHit  == 0
+	  && m_CacheMiss == 0)
+	{
+		return 0.0;
+	}
 
+	return ( m_CacheHit / (m_CacheHit + m_CacheMiss));
+}
 
 // ---------------
 // EOF
