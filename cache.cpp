@@ -272,7 +272,8 @@ void Cache::BusOperation(char BusOp, unsigned int Address, char* SnoopResult)
 char Cache::GetSnoopResult(unsigned int Address)
 {
     // Mask the Address to remove all but the two Least Significant Bits
-    int8_t twoLSB = Address && 0x03;
+    Address &= 0x03;
+    int8_t twoLSB = static_cast<int8_t>(Address);
     char SnoopResult;
     switch(twoLSB)
     {

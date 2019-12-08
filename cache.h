@@ -93,9 +93,9 @@ private:
     void update_PLRU(unsigned int Index, unsigned int Way);
     unsigned int find_PLRU(unsigned int Index);
 
-    unsigned int Get_Tag(   unsigned int Address){ return (Address>>22); }
-    unsigned int Get_Index( unsigned int Address){ return ((Address && 0x003FFFC0) >> 6); }
-    unsigned int Get_Offset(unsigned int Address){ return (Address && 0x0000003F); }
+    unsigned int Get_Tag(   unsigned int Address){ return ( Address>>22); }
+    unsigned int Get_Index( unsigned int Address){ return ((Address &= 0x003FFFC0) >> 6); }
+    unsigned int Get_Offset(unsigned int Address){ return ( Address &= 0x0000003F); }
 
     void BusOperation(char BusOp, unsigned int Address, char* SnoopResult);
     char GetSnoopResult(unsigned int Address);
