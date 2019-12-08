@@ -13,7 +13,7 @@
 // Uses write allocate, MESI, and psuedo-LRU.
 
 #include "main.h"
-#include "cache.h"
+#include "cache.cpp"
 
 using namespace std;
 
