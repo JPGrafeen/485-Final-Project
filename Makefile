@@ -1,14 +1,16 @@
 EXNAME = cacheSim
+CC = g++
 FLAGS = -g -Wall
+OBJS = main.o cache.o
 
-all: main.o cache.o
-	g++ $(FLAGS) -o $(EXNAME) main.o
+$(EXNAME): $(OBJS)
+	$(CC) $(FLAGS) -o $(EXNAME) $(OBJS)
 
 main.o: main.cpp main.h
-	g++ $(FLAGS) -c main.cpp
+	$(CC) $(FLAGS) -c main.cpp
 
 cache.o: cache.cpp cache.h
-	g++ $(FLAGS) -c cache.cpp
+	$(CC) $(FLAGS) -c cache.cpp
 
 clean:
 	rm *.o *.out $(EXNAME)
