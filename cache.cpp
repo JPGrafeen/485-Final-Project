@@ -26,7 +26,7 @@ bool Cache::Cache_Hit(unsigned int Address)
     for (int i = 0; i < CacheAssc; ++i)
     {
         // If Tag is present and Valid
-        if (ptrIndex[i].Tag == aTag && ptrIndex[i].Valid)
+        if (ptrIndex[i].Tag == Tag && ptrIndex[i].Valid)
         {
             Hit = true;
         }
@@ -51,7 +51,7 @@ bool Cache::Cache_Mod(unsigned int Address)
     for (int i = 0; i < CacheAssc; ++i)
     {
         // If Tag is present and Valid
-        if (ptrIndex[i].Tag == aTag && ptrIndex[i].Dirty)
+        if (ptrIndex[i].Tag == Tag && ptrIndex[i].Dirty)
         {
             Mod = true;
         }
