@@ -15,7 +15,8 @@ class Cache {
 public:
     
     // Constructor
-    Cache()
+    Cache() :
+    m_DebugMode(false)
     {
         Clear_Cache();
     }
@@ -23,6 +24,7 @@ public:
     // Destructor
     ~Cache(){
         Clear_Cache();
+        Tag_Array = nullptr;
     }
 
 
@@ -30,7 +32,7 @@ public:
         bool         Valid;      // Valid bit, data is able to be read or modified
         bool         Dirty;      // Dirty bit, data has been modified
         char         MESI;       // 1 hot encoding of the MESI states using 8'b vector
-        unsigned int Tag;         // Data tag
+        unsigned int Tag;        // Data tag
     };
 
 private:
