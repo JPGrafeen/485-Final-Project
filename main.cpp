@@ -55,12 +55,12 @@ int main (int argc, char *argv[])
 		// Read line by line until eof and perform the trace operation for the trace address
 		string sOperation;
 		string sAddress;
-		while( getline(file,sOperation,' '))
+		while( getline(file, sOperation, ' '))
 		{
-			getline(file,sAddress);
+			getline(file, sAddress);
 
 			// Convert strings to appropriate data types
-			TraceOp eOperation = static_cast<int>(sOperation) - static_cast<int>('0');
+			TraceOp eOperation   = static_cast<TraceOp>(stoi(sOperation));
 			unsigned int Address = stoul(sAddress, nullptr, 16);
 
 			switch(eOperation)
@@ -95,7 +95,8 @@ int main (int argc, char *argv[])
 			}
 		}
 
-		for (int i = 0; i < 32; ++i)
+		// Laxy programming to clear the screen
+		for (int i = 0; i < 64; ++i)
 		{
 			cout << endl;
 		}
@@ -106,6 +107,7 @@ int main (int argc, char *argv[])
 		cout << "Hits:   " << my_cache.Get_CacheHit()   << endl;
 		cout << "Misses: " << my_cache.Get_CacheMiss()  << endl;
 		cout << "Ratio:  " << my_cache.Get_CacheRatio() << endl;
+		cout << endl << endl;
 
 		file.close();
 		return 0;
