@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
 		return 3;
 	}
 
-	Tag_Array TagArray[NofIndex][CacheAssc];
+	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
 
 	Cache my_cache(*TagArray);
 
