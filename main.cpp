@@ -24,18 +24,12 @@ int main (int argc, char *argv[])
 	if (sizeof(unsigned int) != 4)
 	{
 		cout << "Incompatible compiler used" << endl;
-		return 3;
+		return 2;
 	}
 
 	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
 
 	Cache my_cache(*TagArray);
-
-	if(!my_cache)
-	{
-		cout << "Error creating cache" << endl;
-		return 2;
-	}
 
 	// Parse Arguments
 	string filename;
