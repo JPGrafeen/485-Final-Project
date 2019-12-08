@@ -53,9 +53,7 @@ int main (int argc, char *argv[])
 	}
 	else{
 		filename = argv[1];
-		if (argv[2] == "--debug"){
-			m_DebugMode = true;
-		}
+		m_DebugMode = (argv[2] == "--debug");
 	}
 
 	// Open file
