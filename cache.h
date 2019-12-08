@@ -8,6 +8,9 @@
 *   Cache class declarations
 */
 
+#pragma once
+#include <cstdio>
+#include <cstdint>
 
 #define CacheSize 2^24   //16MiB
 #define CacheLine 2^6    //64Bytes
@@ -19,27 +22,13 @@ class Cache {
 
 public:
     
-    // Constructor
-    Cache(Tag_Array* TagArray) :
-    m_TagArray(TagArray)
-    m_DebugMode(false)
-    {
-        Clear_Cache();
-    }
-
-    // Destructor
-    ~Cache(){
-        Clear_Cache();
-        m_TagArray = nullptr;
-    }
-
-
     struct Tag_Array_Entry{
         bool         Valid;      // Valid bit, data is able to be read or modified
         bool         Dirty;      // Dirty bit, data has been modified
         char         MESI;       // 1 hot encoding of the MESI states using 8'b vector
         unsigned int Tag;        // Data tag
     };
+    typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system.
 
     enum BusOp{
         BUS_READ   = 1,  // Read request placed on Bus
@@ -61,6 +50,20 @@ public:
         MSG_EVICTLINE  = 4   //L1 should evict the line
     };
 
+    // Constructor
+    Cache(Tag_Array* TagArray) :
+    m_TagArray(TagArray),
+    m_DebugMode(false)
+    {
+        Clear_Cache();
+    }
+
+    // Destructor
+    ~Cache(){
+        Clear_Cache();
+        m_TagArray = nullptr;
+    }
+
 
     void L1_Data_Read(unsigned int Address);
     void L1_Data_Write(unsigned int Address);
@@ -73,11 +76,11 @@ public:
     void Clear_Cache();
     void Print_Cache();
 
-    unsigned int Get_CacheRatio() { return (m_CacheHit / (m_CacheHit + m_CacheMiss)); }
-    unsigned int Get_CacheRead(){ return m_CacheRead; }
+    unsigned int Get_CacheRatio(){ return (m_CacheHit / (m_CacheHit + m_CacheMiss)); }
+    unsigned int Get_CacheRead(){  return m_CacheRead; }
     unsigned int Get_CacheWrite(){ return m_CacheWrite; }
-    unsigned int Get_CacheHit(){ return m_CacheHit; }
-    unsigned int Get_CacheMiss(){ return m_CacheWrite; }
+    unsigned int Get_CacheHit(){   return m_CacheHit; }
+    unsigned int Get_CacheMiss(){  return m_CacheWrite; }
 
     void Set_DebugMode(bool DebugMode){ m_DebugMode = DebugMode; }
     bool Get_DebugMode(){ return m_DebugMode; }
@@ -101,7 +104,6 @@ private:
 
 
     // Member Variables
-    typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system. 
     Tag_Array* m_TagArray;
     bool m_DebugMode;
     unsigned int m_CacheRead;

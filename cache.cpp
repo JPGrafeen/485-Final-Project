@@ -45,7 +45,7 @@ bool Cache::Cache_Mod(unsigned int Address)
     unsigned int aIndex = Get_Index(Address);
     unsigned int aTag   = Get_Tag(Address);
 
-    Tag_Array* ptrIndex = &m_TagArray[Index];
+    Tag_Array* ptrIndex = &m_TagArray[aIndex];
 
     bool Mod = false;
     for (int i = 0; i < CacheAssc; ++i)
@@ -245,7 +245,7 @@ void Cache::update_PLRU(unsigned int Index, unsigned int Way)
 //--------------------------------------------------------------------------------
 unsigned int Cache::find_PLRU(unsigned int Index)
 {
-    //return the "Way" of the LRU element
+    return 0;
 }
 
 

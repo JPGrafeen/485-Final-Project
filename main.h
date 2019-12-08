@@ -8,10 +8,9 @@
 *   Necessary data structures and definitions for standard program
 */
 
-
+#pragma once
 #include <cstdio>
 #include <string>
-#include <cstdint>
 #include <iostream>
 #include <fstream>
 

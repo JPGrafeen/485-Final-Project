@@ -33,7 +33,7 @@ int main (int argc, char *argv[])
 	if(!my_cache)
 	{
 		cout << "Error creating cache" << endl;
-		return 2
+		return 2;
 	}
 
 	// Parse Arguments
@@ -55,71 +55,70 @@ int main (int argc, char *argv[])
 	}
 
 	// Open file
-	ifstream file;
-	file.open(filename);
-	if (!file){
-		cout << "File open error!" << endl;
-		return 1;
-	}
-
-
-	// Read line by line until eof and perform the trace operation for the trace address
-	string sOperation;
-	string sAddress;
-	while( getline(filename,sOperation,' '))
-	{
-		getline(filename,sAddress);
-
-		// Convert strings to appropriate data types
-		TraceOp eOperation = sOperation - '0';
-		unsigned int Address = stoul(sAddress, nullptr, 16);
-
-		switch(eOperation)
+	ifstream file (filename);
+	if (file.is_open()){
+		// Read line by line until eof and perform the trace operation for the trace address
+		string sOperation;
+		string sAddress;
+		while( getline(file,sOperation,' '))
 		{
-		case TRC_L1_DATA_READ:
-			my_cache.L1_Data_Read(Address);
-			break;
-		case TRC_L1_DATA_WRITE:
-			my_cache.L1_Data_Write(Address);
-			break;
-		case TRC_L1_INST_READ:
-			my_cache.L1_Inst_Read(Address);
-			break;
-		case TRC_SNP_INVALIDATE:
-			my_cache.SNP_Invalidate(Address);
-			break;
-		case TRC_SNP_READ:
-			my_cache.SNP_Read(Address);
-			break;
-		case TRC_SNP_WRITE:
-			my_cache.SNP_Write(Address);
-			break;
-		case TRC_SNP_RWIM:
-			my_cache.SNP_RWIM(Address);
-			break;
-		case TRC_CLR_CACHE:
-			my_cache.Clear_Cache();
-			break;
-		case TRC_PRNT_CACHE:
-			my_cache.Print_Cache();
-			break;
+			getline(file,sAddress);
+
+			// Convert strings to appropriate data types
+			TraceOp eOperation = sOperation - '0';
+			unsigned int Address = stoul(sAddress, nullptr, 16);
+
+			switch(eOperation)
+			{
+			case TRC_L1_DATA_READ:
+				my_cache.L1_Data_Read(Address);
+				break;
+			case TRC_L1_DATA_WRITE:
+				my_cache.L1_Data_Write(Address);
+				break;
+			case TRC_L1_INST_READ:
+				my_cache.L1_Inst_Read(Address);
+				break;
+			case TRC_SNP_INVALIDATE:
+				my_cache.SNP_Invalidate(Address);
+				break;
+			case TRC_SNP_READ:
+				my_cache.SNP_Read(Address);
+				break;
+			case TRC_SNP_WRITE:
+				my_cache.SNP_Write(Address);
+				break;
+			case TRC_SNP_RWIM:
+				my_cache.SNP_RWIM(Address);
+				break;
+			case TRC_CLR_CACHE:
+				my_cache.Clear_Cache();
+				break;
+			case TRC_PRNT_CACHE:
+				my_cache.Print_Cache();
+				break;
+			}
 		}
-	}
-	file.close();
 
-	for (int i = 0; i < 32; ++i)
-	{
-		cout << endl;
-	}
-	cout << "----------------------------------------------------------------" << endl << endl;
-	cout << "Cache Statistics" << endl << endl << endl;
-	cout << "Reads:  " << my_cache.Get_CacheRead()  << endl;
-	cout << "Writes: " << my_cache.Get_CacheWrite() << endl;
-	cout << "Hits:   " << my_cache.Get_CacheHit()   << endl;
-	cout << "Misses: " << my_cache.Get_CacheMiss()  << endl;
-	cout << "Ratio:  " << my_cache.Get_CacheRatio() << endl;
+		for (int i = 0; i < 32; ++i)
+		{
+			cout << endl;
+		}
+		cout << "----------------------------------------------------------------" << endl << endl;
+		cout << "Cache Statistics" << endl << endl << endl;
+		cout << "Reads:  " << my_cache.Get_CacheRead()  << endl;
+		cout << "Writes: " << my_cache.Get_CacheWrite() << endl;
+		cout << "Hits:   " << my_cache.Get_CacheHit()   << endl;
+		cout << "Misses: " << my_cache.Get_CacheMiss()  << endl;
+		cout << "Ratio:  " << my_cache.Get_CacheRatio() << endl;
 
-	return 0;
+		file.close();
+		return 0;
+	}
+
+
+	cout << "File open error!" << endl;
+	return 1;
 }
 
 // ---------------
