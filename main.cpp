@@ -53,11 +53,21 @@ int main (int argc, char *argv[])
 			cout << "Enter '--debug' as the second argument to enter debug mode." << endl << endl;
 			return 0;
 		}
+		else if (filename == "--debug")
+		{
+			cout << "No file name given" << endl;
+		}
 		else if (argv[2])
 		{
 			mode = argv[2];
 			my_cache.Set_DebugMode((mode == "--debug" ? true : false));
 		}
+	}
+
+	//Temporary sanity check
+	for (int i = 0; i < CacheAssc; ++i)
+	{
+		cout << i << endl;
 	}
 
 

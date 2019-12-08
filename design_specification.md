@@ -302,6 +302,7 @@ Combined Cache operations
 			- increment m_CacheHit
 			- increment m_CacheRead
 			- stay in current MESI state
+			- simulate SENDLINE
 		- on a miss,
 			- increment m_CacheMiss
 			- increment m_CacheRead

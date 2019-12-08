@@ -17,22 +17,22 @@
 //--------------------------------------------------------------------------------
 bool Cache::Cache_Hit(unsigned int Address)
 {
-    unsigned int aIndex = Get_Index(Address);
-    unsigned int aTag   = Get_Tag(Address);
+    unsigned int Index = Get_Index(Address);
+    unsigned int Tag   = Get_Tag(Address);
 
-    Tag_Array* ptrIndex = &m_TagArray[aIndex];
+    Tag_Array* ptrIndex = &m_TagArray[Index];
 
-    bool hit = false;
+    bool Hit = false;
     for (int i = 0; i < CacheAssc; ++i)
     {
         // If Tag is present and Valid
         if (ptrIndex[i].Tag == aTag && ptrIndex[i].Valid)
         {
-            hit = true;
+            Hit = true;
         }
     }
 
-    return hit;
+    return Hit;
 }
 
 
@@ -42,10 +42,10 @@ bool Cache::Cache_Hit(unsigned int Address)
 //--------------------------------------------------------------------------------
 bool Cache::Cache_Mod(unsigned int Address)
 {
-    unsigned int aIndex = Get_Index(Address);
-    unsigned int aTag   = Get_Tag(Address);
+    unsigned int Index = Get_Index(Address);
+    unsigned int Tag   = Get_Tag(Address);
 
-    Tag_Array* ptrIndex = &m_TagArray[aIndex];
+    Tag_Array* ptrIndex = &m_TagArray[Index];
 
     bool Mod = false;
     for (int i = 0; i < CacheAssc; ++i)
@@ -68,27 +68,61 @@ bool Cache::Cache_Mod(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::L1_Data_Read(unsigned int Address)
 {
-//    if (Cache_Hit(Address))
-//    {
-//        ++m_CacheHit;
-//        ++m_CacheRead;
-//        //Stay in MESI state
-//    }
-//    else
-//    {
-//        ++m_CacheMiss;
-//        ++m_CacheRead;
-//
-//        char SnoopResult = 0x00;
-//        BusOperation(static_cast<char>(BUS_READ), Address, &SnoopResult)
-//
-//        if ( SnoopResult == SNP_HIT
-//          || SnoopResult == SNP_HITM)
-//        {
-//            unsigned int Tag   = Get_Tag(Address);
-//            unsigned int Index = Get_Index(Address);
-//        }
-//    }
+    if (Cache_Hit(Address))
+    {
+        ++m_CacheHit;
+        //Stay in MESI state
+    }
+    else
+    {
+        ++m_CacheMiss;
+
+        char    SnoopResult = 0x00;
+        unsigned int  Index = Get_Index(Address);
+        unsigned int    Tag = Get_Tag(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        int VictimWay;
+
+        for (VictimWay = 0; VictimWay < CacheAssc && ptrIndex[VictimWay].Valid; )
+        {
+            // Do nothing, just seeing if every cache line is valid.
+            // Consequence, if we find an invalid cache line it will 
+            // meet the design assumption by being the lowest numbered
+            // cache line to fill.
+            ++VictimWay;
+        }
+
+        if (VictimWay >= CacheAssc)
+        {
+            VictimWay = find_PLRU(Index);
+            if (ptrIndex[VictimWay].Dirty)
+            {
+                MessageToCache(static_cast<char>(MSG_GETLINE), Address);
+                BusOperation(static_cast<char>(BUS_WRITE), Address, &SnoopResult); //SnoopResult discarded.
+            }
+        }
+
+        BusOperation(static_cast<char>(BUS_READ), Address, &SnoopResult);
+
+        ptrIndex[VictimWay].Valid = true;
+        ptrIndex[VictimWay].Dirty = false;
+        ptrIndex[VictimWay].Tag   = Tag;
+
+        update_PLRU(Index, VictimWay);
+
+        if ( SnoopResult == SNP_HIT
+          || SnoopResult == SNP_HITM)
+        {
+            ptrIndex[VictimWay].MESI = 'S';
+        }
+        else
+        {
+            ptrIndex[VictimWay].MESI = 'E';
+        }
+    }
+
+    ++m_CacheRead;
+    MessageToCache(static_cast<char>(MSG_SENDLINE), Address);
 }
 
 
@@ -100,14 +134,28 @@ void Cache::L1_Data_Read(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::L1_Data_Write(unsigned int Address)
 {
-    if (Cache_Hit(Address))
-    {
-        /* code */
-    }
-    else
-    {
-        
-    }
+//
+//    char    SnoopResult = 0x00;
+//    unsigned int  Index = Get_Index(Address);
+//    unsigned int    Tag = Get_Tag(Address);
+//    Tag_Array* ptrIndex = &m_TagArray[Index];
+//    int VictimWay;
+//
+//
+//    if (Cache_Hit(Address))
+//    {
+//        ++m_CacheHit;
+//        for (int i = 0; i < CacheAssc || ptrIndex[i].Tag == Tag; ++i)
+//        {
+//
+//        }
+//    }
+//    else
+//    {
+//        ++m_CacheMiss;
+//    }
+
+
 }
 
 
@@ -240,7 +288,7 @@ void Cache::update_PLRU(unsigned int Index, unsigned int Way)
 }
 
 //--------------------------------------------------------------------------------
-// Description: Updates the PLRU array after a data usaage has occured. 
+// Description: Returns the Way in the Index which was least recently used (pseudo)
 //
 //--------------------------------------------------------------------------------
 unsigned int Cache::find_PLRU(unsigned int Index)
