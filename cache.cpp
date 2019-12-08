@@ -258,9 +258,9 @@ void Cache::BusOperation(char BusOp, unsigned int Address, char* SnoopResult)
 {
     *SnoopResult = GetSnoopResult(Address);
 
-    if (!m_DebugMode)
+    if (m_DebugMode)
     {
-        printf("BusOp: %d, Address: %h, Snoop Result: %d\n", BusOp, Address, *SnoopResult);
+        printf("BusOp: %d, Address: %x, Snoop Result: %d\n", BusOp, Address, *SnoopResult);
     }
 }
 
@@ -301,9 +301,9 @@ char Cache::GetSnoopResult(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::PutSnoopResult(unsigned int Address, char SnoopResult)
 {
-    if (!m_DebugMode)
+    if (m_DebugMode)
     {
-        printf("SnoopResult: Address %h, SnoopResult: %d\n", Address, SnoopResult);
+        printf("SnoopResult: Address %x, SnoopResult: %d \n", Address, SnoopResult);
     }
 }
 
@@ -314,9 +314,9 @@ void Cache::PutSnoopResult(unsigned int Address, char SnoopResult)
 //--------------------------------------------------------------------------------
 void Cache::MessageToCache(char Message, unsigned int Address)
 {
-    if (!m_DebugMode)
+    if (m_DebugMode)
     {
-        printf("L2: %d %h\n", Message, Address);
+        printf("L2: %d %x \n", Message, Address);
     }
 }
 

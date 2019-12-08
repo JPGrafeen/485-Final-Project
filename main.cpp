@@ -13,6 +13,7 @@
 // Uses write allocate, MESI, and psuedo-LRU.
 
 #include "main.h"
+#include "cache.h"
 #include "cache.cpp"
 
 using namespace std;
@@ -65,7 +66,7 @@ int main (int argc, char *argv[])
 			getline(file,sAddress);
 
 			// Convert strings to appropriate data types
-			TraceOp eOperation = sOperation - '0';
+			TraceOp eOperation = static_cast<int>(sOperation) - static_cast<int>('0');
 			unsigned int Address = stoul(sAddress, nullptr, 16);
 
 			switch(eOperation)
