@@ -288,6 +288,12 @@ MESI Protocol:
 		- on a miss,
 			- stay in I
 
+Set Tag:
+
+	- This cache simulation uses Pseudo Least Recently Used (PLRU) for the eviction policy. 
+	- given an index, on a miss, the Victim will be selected and overwritten with the new tag and control bits
+	- from the assumptions if there are empty cache lines, the lowest valued way will be filled first. 
+
 
 Combined Cache operations
 
@@ -299,9 +305,18 @@ Combined Cache operations
 		- on a miss,
 			- increment m_CacheMiss
 			- increment m_CacheRead
+			- if required, Evict cache line and send EVICTLINE to L1
+				- if dirty bit is true for victim
+					- simulate GETLINE
+					- simulate a BusOperation for WRITE
+					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
+				- set valid==true
+				- set dirty==false
+				- set tag
 				- if GetSnoopResult returns HITM or HIT update state to S
 					- else update state to E
+			- simulate SENDLINE
 	- For Operation 1 'write request from L1 data cache'
 		- on a hit,
 			- increment m_CacheHit
@@ -318,7 +333,16 @@ Combined Cache operations
 		- on a miss,
 			- increment m_CacheMiss
 			- increment m_CacheWrite
+			- if required, Evict cache line and send EVICTLINE to L1
+				- if dirty bit is true for victim
+					- simulate GETLINE
+					- simulate a BusOperation for WRITE
+					- then continue with the EVICTLINE
 			- simulate BusOperation for RWIM
+				- set valid==true
+				- set dirty==false
+				- set tag
+			- simulate SENDLINE
 			- move to M (shoulda been in I)
 	- For Operation 2 'read request from L1 instruction cache'
 		- on a hit, 
@@ -328,9 +352,18 @@ Combined Cache operations
 		- on a miss,
 			- increment m_CacheMiss
 			- increment m_CacheRead
+			- if required, Evict cache line and send EVICTLINE to L1
+				- if dirty bit is true for victim
+					- simulate GETLINE
+					- simulate a BusOperation for WRITE
+					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
+				- set valid==true
+				- set dirty==false
+				- set tag
 				- if GetSnoopResult returns HITM or HIT update state to S
 					- else update state to E
+				- simulate SENDLINE
 	- For Operation 3 'snooped invalidate command'
 		- on a hit,
 			- state == M
@@ -340,6 +373,7 @@ Combined Cache operations
 			- state == S
 				- simulate a HIT
 				- move to I
+				- set valid==false
 				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
@@ -350,6 +384,7 @@ Combined Cache operations
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
+				- set dirty==false
 				- move to S
 			- state == E
 				- move to S
@@ -367,6 +402,8 @@ Combined Cache operations
 				- Error State - You should have been EXCLUSIVE
 			- state == S
 				- move to I
+				- set valid==false
+				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
 		- on a miss,
@@ -376,11 +413,15 @@ Combined Cache operations
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
+				- set valid==false
 				- move to I
+				- simulate INVALIDATELINE
 			- state == E
 				- move to I
+				- simulate INVALIDATELINE
 			- state == S
 				- move to I
+				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have a hit and Invalid
 		- on a miss,
@@ -392,7 +433,9 @@ Combined Cache operations
 
 
 
-
+// ---------------
+// EOF
+// ---------------
 
 
 

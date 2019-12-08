@@ -9,6 +9,11 @@
 */
 
 
+#define CacheSize = 2^24   //16MiB
+#define CacheLine = 2^6    //64Bytes
+#define CacheAssc = 2^3    //8-way set associativity
+#define NofIndex  = CacheSize / (CacheLine * CacheAssc)
+
 
 class Cache {
 
@@ -35,6 +40,26 @@ public:
         unsigned int Tag;        // Data tag
     };
 
+    enum BusOp{
+        BUS_READ   = 1,  // Read request placed on Bus
+        BUS_WRITE  = 2,  // Write request placed on Bus
+        BUS_INV    = 3,  // Invalidate command placed on Bus
+        BUS_RWIM   = 4   // Read with intent to modify placed on Bus
+    };
+
+    enum SnoopOp{
+        SNP_NOHIT  = 0,  // Miss reply to snooped request
+        SNP_HIT    = 1,  // Hit reply to snooped request
+        SNP_HITM   = 2   // Hit Modified reply to snooped request
+    };
+
+    enum L1L2MSG{
+        MSG_GETLINE    = 1,  //L1 should send the latest version of a line to L2
+        MSG_SENDLINE   = 2,  //L2 is sending a modified line to L1
+        MSG_INV_LINE   = 3,  //L1 should invalidate the line
+        MSG_EVICTLINE  = 4   //L1 should evict the line
+    };
+
 private:
     void L1_Data_Read(unsigned int Address);
     void L1_Data_Write(unsigned int Address);
@@ -48,6 +73,7 @@ private:
     void Print_Cache();
 
     void update_PLRU(unsigned int Index, unsigned int Way);
+    unsigned int find_PLRU(unsigned int Index);
 
     unsigned int Get_Tag(unsigned int Address){ return (Address>>22); }
     unsigned int Get_Index(unsigned int Address){ return ((Address && 0x003FFFC0) >> 6); }
@@ -62,10 +88,16 @@ private:
 
 
     // Member Variables
-    Tag_Array_Entry* Tag_Array;
+    typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system. 
+    Tag_Array* m_TagArray;
     bool m_DebugMode;
     unsigned int m_CacheRead;
     unsigned int m_CacheWrite;
     unsigned int m_CacheHit;
     unsigned int m_CacheMiss;
 };
+
+
+// ---------------
+// EOF
+// ---------------

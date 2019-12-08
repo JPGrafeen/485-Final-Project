@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
 
 	if(my_cache)
 	{
-		my_cache.Tag_Array = *Tag_Array;
+		my_cache.m_TagArray = *Tag_Array;
 	}
 	else
 	{
@@ -107,14 +107,20 @@ int main (int argc, char *argv[])
 			break;
 		}
 	}
-
-	cout <<  "Reads: "  << my_cache.m_CacheRead  << endl;
-	cout <<  "Writes: " << my_cache.m_CacheWrite << endl;
-	cout <<  "Hits: "   << my_cache.m_CacheHit   << endl;
-	cout <<  "Misses: " << my_cache.m_CacheMiss  << endl;
-	cout <<  "Ratio: "  << Cache_Ratio()         << endl;
-
 	file.close();
+
+	for (int i = 0; i < 32; ++i)
+	{
+		cout << endl;
+	}
+	cout << "----------------------------------------------------------------" << endl << endl;
+	cout << "Cache Statistics" << endl << endl << endl;
+	cout << "Reads:  " << my_cache.m_CacheRead  << endl;
+	cout << "Writes: " << my_cache.m_CacheWrite << endl;
+	cout << "Hits:   " << my_cache.m_CacheHit   << endl;
+	cout << "Misses: " << my_cache.m_CacheMiss  << endl;
+	cout << "Ratio:  " << Cache_Ratio()         << endl;
+
 	return 0;
 }
 

@@ -15,11 +15,6 @@
 #include <iostream>
 #include <fstream>
 
-#define CacheSize = 2^24   //16MiB
-#define CacheLine = 2^6    //64Bytes
-#define CacheAssc = 2^3    //8-way set associativity
-#define NofIndex  = CacheSize / (CacheLine * CacheAssc)
-
 enum TraceOp{
     TRC_L1_DATA_READ     = 0,  // Read request from L1 Data Cache
     TRC_L1_DATA_WRITE    = 1,  // Write request from L1 Data Cache
@@ -32,27 +27,10 @@ enum TraceOp{
     TRC_PRNT_CACHE       = 9   // Print cache contents and state of each valid cache line
 };
 
-enum BusOp{
-    BUS_READ   = 1,  // Read request placed on Bus
-    BUS_WRITE  = 2,  // Write request placed on Bus
-    BUS_INV    = 3,  // Invalidate command placed on Bus
-    BUS_RWIM   = 4   // Read with intent to modify placed on Bus
-};
 
-enum SnoopOp{
-    SNP_NOHIT  = 0,  // Miss reply to snooped request
-    SNP_HIT    = 1,  // Hit reply to snooped request
-    SNP_HITM   = 2   // Hit Modified reply to snooped request
-};
-
-enum L1L2MSG{
-    MSG_GETLINE    = 1,  //L1 should send the latest version of a line to L2
-    MSG_SENDLINE   = 2,  //L2 is sending a modified line to L1
-    MSG_INV_LINE   = 3,  //L1 should invalidate the line
-    MSG_EVICTLINE  = 4   //L1 should evict the line
-};
-
-
+// ---------------
+// EOF
+// ---------------
 
 
 
