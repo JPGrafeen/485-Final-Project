@@ -289,6 +289,108 @@ MESI Protocol:
 			- stay in I
 
 
+Combined Cache operations
+
+	- For Operation 0 'read request from L1 data cache'
+		- on a hit, 
+			- increment m_CacheHit
+			- increment m_CacheRead
+			- stay in current MESI state
+		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheRead
+			- simulate BusOperation for READ
+				- if GetSnoopResult returns HITM or HIT update state to S
+					- else update state to E
+	- For Operation 1 'write request from L1 data cache'
+		- on a hit,
+			- increment m_CacheHit
+			- increment m_CacheWrite
+			- state == M
+				- stay in M
+			- state == E
+				- move to M
+			- state == S
+				- move to M
+				- simulate BusOperation for INVALIDATE
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheWrite
+			- simulate BusOperation for RWIM
+			- move to M (shoulda been in I)
+	- For Operation 2 'read request from L1 instruction cache'
+		- on a hit, 
+			- increment m_CacheHit
+			- increment m_CacheRead
+			- stay in current MESI state
+		- on a miss,
+			- increment m_CacheMiss
+			- increment m_CacheRead
+			- simulate BusOperation for READ
+				- if GetSnoopResult returns HITM or HIT update state to S
+					- else update state to E
+	- For Operation 3 'snooped invalidate command'
+		- on a hit,
+			- state == M
+				- Error State - You should have been EXCLUSIVE
+			- state == E
+				- Error State - You should have been EXCLUSIVE
+			- state == S
+				- simulate a HIT
+				- move to I
+				- simulate INVALIDATELINE
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- Stay in I, all others are Error States
+	- For Operation 4 'snooped read request'
+		- on a hit,
+			- state == M
+				- simulate a GETLINE
+				- simulate a BusOperation for WRITE
+				- move to S
+			- state == E
+				- move to S
+			- state == S
+				- stay in S
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- stay in I
+	- For Operation 5 'snooped write request'
+		- on a hit,
+			- state == M
+				- Error State - You should have been EXCLUSIVE
+			- state == E
+				- Error State - You should have been EXCLUSIVE
+			- state == S
+				- move to I
+			- state == I
+				- Error State - can't have hit and Invalid
+		- on a miss,
+			- stay in I
+	- For Operation 6 'snooped read with intent to modify request'
+		- on a hit,
+			- state == M
+				- simulate a GETLINE
+				- simulate a BusOperation for WRITE
+				- move to I
+			- state == E
+				- move to I
+			- state == S
+				- move to I
+			- state == I
+				- Error State - can't have a hit and Invalid
+		- on a miss,
+			- stay in I
+
+
+
+
+
+
 
 
 
