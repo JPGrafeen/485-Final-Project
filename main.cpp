@@ -35,6 +35,10 @@ int main (int argc, char *argv[])
 		return 0;
 	}
 
+	// create cache object and initialize.
+	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
+	Cache my_cache(*TagArray);
+
 	if (argc < 2)
 	{ //No filename provided.
 		bool mode;
@@ -55,9 +59,6 @@ int main (int argc, char *argv[])
 	ifstream file (filename);
 	if (file.is_open())
 	{
-		Cache::Tag_Array TagArray[NofIndex][CacheAssc];
-		Cache my_cache(*TagArray);
-
 		// Read line by line until eof and perform the trace operation for the trace address
 		string sOperation;
 		string sAddress;
