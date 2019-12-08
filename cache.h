@@ -12,9 +12,9 @@
 #include <cstdio>
 #include <cstdint>
 
-#define CacheSize 2^24   //16MiB
-#define CacheLine 2^6    //64Bytes
-#define CacheAssc 2^3    //8-way set associativity
+#define CacheSize 16777216   //16MiB
+#define CacheLine 64         //64Bytes
+#define CacheAssc 8          //8-way set associativity
 #define NofIndex  CacheSize / (CacheLine * CacheAssc)
 
 
