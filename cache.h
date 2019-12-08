@@ -10,6 +10,7 @@
 
 #pragma once
 #include <cstdio>
+#include <iostream>
 #include <cstdint>
 
 #define CacheSize 16777216   //16MiB
@@ -17,38 +18,34 @@
 #define CacheAssc 8          //8-way set associativity
 #define NofIndex  CacheSize / (CacheLine * CacheAssc)
 
+#define BUS_READ      0x01  // Read request placed on Bus
+#define BUS_WRITE     0x02  // Write request placed on Bus
+#define BUS_INV       0x03  // Invalidate command placed on Bus
+#define BUS_RWIM      0x04  // Read with intent to modify placed on Bus
 
-class Cache {
+#define SNP_NOHIT     0x00  // Miss reply to snooped request
+#define SNP_HIT       0x01  // Hit reply to snooped request
+#define SNP_HITM      0x02  // Hit Modified reply to snooped request
+
+#define MSG_GETLINE   0x01  //L1 should send the latest version of a line to L2
+#define MSG_SENDLINE  0x02  //L2 is sending a modified line to L1
+#define MSG_INV_LINE  0x03  //L1 should invalidate the line
+#define MSG_EVICTLINE 0x04  //L1 should evict the line
+
+
+class Cache 
+{
 
 public:
-    
-    struct Tag_Array_Entry{
+
+    struct Tag_Array_Entry
+    {
         bool         Valid;      // Valid bit, data is able to be read or modified
         bool         Dirty;      // Dirty bit, data has been modified
         char         MESI;       // 1 hot encoding of the MESI states using 8'b vector
         unsigned int Tag;        // Data tag
     };
     typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system.
-
-    enum BusOp{
-        BUS_READ   = 1,  // Read request placed on Bus
-        BUS_WRITE  = 2,  // Write request placed on Bus
-        BUS_INV    = 3,  // Invalidate command placed on Bus
-        BUS_RWIM   = 4   // Read with intent to modify placed on Bus
-    };
-
-    enum SnoopOp{
-        SNP_NOHIT  = 0,  // Miss reply to snooped request
-        SNP_HIT    = 1,  // Hit reply to snooped request
-        SNP_HITM   = 2   // Hit Modified reply to snooped request
-    };
-
-    enum L1L2MSG{
-        MSG_GETLINE    = 1,  //L1 should send the latest version of a line to L2
-        MSG_SENDLINE   = 2,  //L2 is sending a modified line to L1
-        MSG_INV_LINE   = 3,  //L1 should invalidate the line
-        MSG_EVICTLINE  = 4   //L1 should evict the line
-    };
 
     // Constructor
     Cache(Tag_Array* TagArray) :
@@ -59,7 +56,8 @@ public:
     }
 
     // Destructor
-    ~Cache(){
+    ~Cache()
+    {
         Clear_Cache();
         m_TagArray = nullptr;
     }
@@ -88,7 +86,10 @@ public:
 
 private:
     bool Cache_Hit(unsigned int Address);
-    bool Cache_Mod(unsigned int Address);
+
+    unsigned int Evict_Line(unsigned int Address, char* SnoopResult);
+
+    unsigned int Snoop_Hit(unsigned int Address);
 
     void update_PLRU(unsigned int Index, unsigned int Way);
     unsigned int find_PLRU(unsigned int Index);

@@ -312,16 +312,18 @@ Combined Cache operations
 					- simulate a BusOperation for WRITE
 					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
-				- set valid==true
-				- set dirty==false
-				- set tag
-				- if GetSnoopResult returns HITM or HIT update state to S
-					- else update state to E
+			- set valid==true
+			- set dirty==false
+			- set tag
+			- if GetSnoopResult returns HITM or HIT update state to S
+				- else update state to E
 			- simulate SENDLINE
+
 	- For Operation 1 'write request from L1 data cache'
 		- on a hit,
 			- increment m_CacheHit
 			- increment m_CacheWrite
+			- set dirty=true
 			- state == M
 				- stay in M
 			- state == E
@@ -340,16 +342,18 @@ Combined Cache operations
 					- simulate a BusOperation for WRITE
 					- then continue with the EVICTLINE
 			- simulate BusOperation for RWIM
-				- set valid==true
-				- set dirty==false
-				- set tag
+			- set valid==true
+			- set dirty==true
+			- set tag
 			- simulate SENDLINE
 			- move to M (shoulda been in I)
+
 	- For Operation 2 'read request from L1 instruction cache'
 		- on a hit, 
 			- increment m_CacheHit
 			- increment m_CacheRead
 			- stay in current MESI state
+			- simulate SENDLINE
 		- on a miss,
 			- increment m_CacheMiss
 			- increment m_CacheRead
@@ -359,12 +363,13 @@ Combined Cache operations
 					- simulate a BusOperation for WRITE
 					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
-				- set valid==true
-				- set dirty==false
-				- set tag
-				- if GetSnoopResult returns HITM or HIT update state to S
-					- else update state to E
-				- simulate SENDLINE
+			- set valid==true
+			- set dirty==false
+			- set tag
+			- if GetSnoopResult returns HITM or HIT update state to S
+				- else update state to E
+			- simulate SENDLINE
+
 	- For Operation 3 'snooped invalidate command'
 		- on a hit,
 			- state == M
@@ -372,16 +377,18 @@ Combined Cache operations
 			- state == E
 				- Error State - You should have been EXCLUSIVE
 			- state == S
-				- simulate a HIT
+				- simulate PutSnoopResult for HIT
 				- move to I
 				- set valid==false
 				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
 		- on a miss,
-			- Stay in I, all others are Error States
+			- simulate PutSnoopResult for NOHIT
+
 	- For Operation 4 'snooped read request'
 		- on a hit,
+			- simulate PutSnoopResult for HIT
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
@@ -394,7 +401,8 @@ Combined Cache operations
 			- state == I
 				- Error State - can't have hit and Invalid
 		- on a miss,
-			- stay in I
+			- simulate PutSnoopResult for NOHIT
+
 	- For Operation 5 'snooped write request'
 		- on a hit,
 			- state == M
@@ -402,15 +410,18 @@ Combined Cache operations
 			- state == E
 				- Error State - You should have been EXCLUSIVE
 			- state == S
+				- simulate PutSnoopResult for HIT
 				- move to I
 				- set valid==false
 				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
 		- on a miss,
-			- stay in I
+			- simulate PutSnoopResult for NOHIT
+
 	- For Operation 6 'snooped read with intent to modify request'
 		- on a hit,
+			- simulate PutSnoopResult for HIT
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
@@ -426,7 +437,7 @@ Combined Cache operations
 			- state == I
 				- Error State - can't have a hit and Invalid
 		- on a miss,
-			- stay in I
+			- simulate PutSnoopResult for NOHIT
 
 
 

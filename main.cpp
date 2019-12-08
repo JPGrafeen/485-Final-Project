@@ -64,12 +64,6 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	//Temporary sanity check
-	for (int i = 0; i < CacheAssc; ++i)
-	{
-		cout << i << endl;
-	}
-
 
 	// Open file
 	ifstream file (filename);

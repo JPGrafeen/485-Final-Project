@@ -35,29 +35,37 @@ bool Cache::Cache_Hit(unsigned int Address)
     return Hit;
 }
 
-
 //--------------------------------------------------------------------------------
-// Description:  Returns true if tag exists and is modified.
+// Description:  Common Algorithm for Evicting a line. Returns Way of the Victim.
 //
 //--------------------------------------------------------------------------------
-bool Cache::Cache_Mod(unsigned int Address)
+unsigned int Cache::Evict_Line(unsigned int Address, char* SnoopResult)
 {
-    unsigned int Index = Get_Index(Address);
-    unsigned int Tag   = Get_Tag(Address);
-
-    Tag_Array* ptrIndex = &m_TagArray[Index];
-
-    bool Mod = false;
-    for (int i = 0; i < CacheAssc; ++i)
+    unsigned int Index     = Get_Index(Address);
+    Tag_Array* ptrIndex    = &m_TagArray[Index];
+    unsigned int VictimWay = 0;
+    for ( ; VictimWay < CacheAssc && ptrIndex[VictimWay].Valid; ++VictimWay)
     {
-        // If Tag is present and Valid
-        if (ptrIndex[i].Tag == Tag && ptrIndex[i].Dirty)
+        // Do nothing, just seeing if every cache line is valid.
+        // Consequence, if we find an invalid cache line it will 
+        // meet the design assumption by being the lowest numbered
+        // cache line to fill.
+    }
+
+    if (VictimWay >= CacheAssc)
+    {
+        VictimWay = find_PLRU(Index);
+        if (ptrIndex[VictimWay].Dirty)
         {
-            Mod = true;
+            MessageToCache(MSG_GETLINE, Address);
+            BusOperation(BUS_WRITE, Address, SnoopResult);
         }
     }
 
-    return Mod;
+    MessageToCache(MSG_EVICTLINE, Address);
+    update_PLRU(Index, VictimWay);
+
+    return VictimWay;
 }
 
 //--------------------------------------------------------------------------------
@@ -81,48 +89,28 @@ void Cache::L1_Data_Read(unsigned int Address)
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
         Tag_Array* ptrIndex = &m_TagArray[Index];
-        int VictimWay;
-
-        for (VictimWay = 0; VictimWay < CacheAssc && ptrIndex[VictimWay].Valid; )
-        {
-            // Do nothing, just seeing if every cache line is valid.
-            // Consequence, if we find an invalid cache line it will 
-            // meet the design assumption by being the lowest numbered
-            // cache line to fill.
-            ++VictimWay;
-        }
-
-        if (VictimWay >= CacheAssc)
-        {
-            VictimWay = find_PLRU(Index);
-            if (ptrIndex[VictimWay].Dirty)
-            {
-                MessageToCache(static_cast<char>(MSG_GETLINE), Address);
-                BusOperation(static_cast<char>(BUS_WRITE), Address, &SnoopResult); //SnoopResult discarded.
-            }
-        }
-
-        BusOperation(static_cast<char>(BUS_READ), Address, &SnoopResult);
+        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
+        BusOperation(BUS_READ, Address, &SnoopResult);
 
         ptrIndex[VictimWay].Valid = true;
         ptrIndex[VictimWay].Dirty = false;
         ptrIndex[VictimWay].Tag   = Tag;
 
-        update_PLRU(Index, VictimWay);
-
         if ( SnoopResult == SNP_HIT
           || SnoopResult == SNP_HITM)
         {
+            // Another LLC reported having a copy, go to Shared
             ptrIndex[VictimWay].MESI = 'S';
         }
         else
         {
+            // No other LLC reported having a copy, go to Exclusive
             ptrIndex[VictimWay].MESI = 'E';
         }
     }
 
     ++m_CacheRead;
-    MessageToCache(static_cast<char>(MSG_SENDLINE), Address);
+    MessageToCache(MSG_SENDLINE, Address);
 }
 
 
@@ -134,28 +122,65 @@ void Cache::L1_Data_Read(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::L1_Data_Write(unsigned int Address)
 {
-//
-//    char    SnoopResult = 0x00;
-//    unsigned int  Index = Get_Index(Address);
-//    unsigned int    Tag = Get_Tag(Address);
-//    Tag_Array* ptrIndex = &m_TagArray[Index];
-//    int VictimWay;
-//
-//
-//    if (Cache_Hit(Address))
-//    {
-//        ++m_CacheHit;
-//        for (int i = 0; i < CacheAssc || ptrIndex[i].Tag == Tag; ++i)
-//        {
-//
-//        }
-//    }
-//    else
-//    {
-//        ++m_CacheMiss;
-//    }
+
+    char    SnoopResult = 0x00;
+    unsigned int  Index = Get_Index(Address);
+    unsigned int    Tag = Get_Tag(Address);
+    Tag_Array* ptrIndex = &m_TagArray[Index];
+    unsigned int VictimWay;
 
 
+    if (Cache_Hit(Address))
+    {
+        ++m_CacheHit;
+        for (VictimWay = 0; VictimWay < CacheAssc || ptrIndex[VictimWay].Tag == Tag; ++VictimWay)
+        {
+            //Walk the index
+        }
+
+        // Check Error States
+        if ( VictimWay >= CacheAssc
+          || ptrIndex[VictimWay].Valid == false)
+        {
+            std::cout << "Error State: Contents of Index changed during L1_Data_Write" << std::endl;
+            return;
+        }
+
+        if (ptrIndex[VictimWay].MESI == 'I')
+        {
+            std::cout << "Error State: Cache_Hit on Invalid during L1_Data_Write" << std::endl;
+            return;
+        }
+
+        // Update Tag Array Entry
+        ptrIndex[VictimWay].Dirty = true;
+
+        if (ptrIndex[VictimWay].MESI == 'S')
+        {
+            BusOperation(BUS_INV, Address, &SnoopResult); // SnoopResult discarded
+        }
+
+        // All states move to Modified
+        ptrIndex[VictimWay].MESI  = 'M';
+
+    }
+    else
+    {
+        ++m_CacheMiss;
+
+        VictimWay = Evict_Line(Address, &SnoopResult);
+
+        BusOperation(BUS_RWIM, Address, &SnoopResult);
+
+        ptrIndex[VictimWay].Valid = true;
+        ptrIndex[VictimWay].Dirty = true;
+        ptrIndex[VictimWay].Tag   = Tag;
+        ptrIndex[VictimWay].MESI  = 'M';
+
+    }
+
+    ++m_CacheWrite;
+    MessageToCache(MSG_SENDLINE, Address);
 }
 
 
@@ -169,12 +194,74 @@ void Cache::L1_Inst_Read(unsigned int Address)
 {
     if (Cache_Hit(Address))
     {
-        /* code */
+        ++m_CacheHit;
+        // Stay in MESI State
     }
     else
     {
-        
+        ++m_CacheMiss;
+
+        char    SnoopResult = 0x00;
+        unsigned int  Index = Get_Index(Address);
+        unsigned int    Tag = Get_Tag(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
+        BusOperation(BUS_READ, Address, &SnoopResult);
+
+        ptrIndex[VictimWay].Valid = true;
+        ptrIndex[VictimWay].Dirty = false;
+        ptrIndex[VictimWay].Tag   = Tag;
+
+        if ( SnoopResult == SNP_HIT
+          || SnoopResult == SNP_HITM)
+        {
+            // Another LLC reported having a copy, go to Shared
+            ptrIndex[VictimWay].MESI = 'S';
+        }
+        else
+        {
+            // No other LLC reported having a copy, go to Exclusive
+            ptrIndex[VictimWay].MESI = 'E';
+        }
     }
+
+    ++m_CacheRead;
+    MessageToCache(MSG_SENDLINE, Address);
+}
+
+
+//--------------------------------------------------------------------------------
+// Description: Common algorithm to find which Way registered a Hit for a Snoop.
+//              Returns this Way value.
+//
+//--------------------------------------------------------------------------------
+unsigned int Cache::Snoop_Hit(unsigned int Address)
+{
+    unsigned int  Index = Get_Index(Address);
+    unsigned int    Tag = Get_Tag(Address);
+    Tag_Array* ptrIndex = &m_TagArray[Index];
+    unsigned int VictimWay = 0;
+    for ( ; VictimWay < CacheAssc || ptrIndex[VictimWay].Tag == Tag; ++VictimWay)
+    {
+        //Walk the index
+    }
+
+    // Check Error States
+    if ( VictimWay >= CacheAssc
+      || ptrIndex[VictimWay].Valid == false)
+    {
+        std::cout << "Error State: Contents of Index changed" << std::endl;
+        VictimWay = find_PLRU(Get_Index(Address));
+    }
+
+    if ( ptrIndex[VictimWay].MESI == 'I' )
+    {
+        std::cout << "Error State: Invalid MESI state" << std::endl;
+        VictimWay = find_PLRU(Get_Index(Address));
+    }
+
+    PutSnoopResult(Address, SNP_HIT);
+    return VictimWay;
 }
 
 
@@ -188,11 +275,24 @@ void Cache::SNP_Invalidate(unsigned int Address)
 {
     if (Cache_Hit(Address))
     {
-        /* code */
+        unsigned int  Index = Get_Index(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Snoop_Hit(Address);
+
+        if ( ptrIndex[VictimWay].MESI == 'S' )
+        {
+            ptrIndex[VictimWay].MESI  = 'I';
+            ptrIndex[VictimWay].Valid = false;
+            MessageToCache(MSG_INV_LINE, Address);
+        }
+        else
+        {
+            std::cout << "Error State: Invalid MESI state during SNP_Invalidate" << std::endl;
+        }
     }
     else
     {
-        
+        PutSnoopResult(Address, SNP_NOHIT); 
     }
 }
 
@@ -207,11 +307,23 @@ void Cache::SNP_Read(unsigned int Address)
 {
     if (Cache_Hit(Address))
     {
-        /* code */
+        unsigned int  Index = Get_Index(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Snoop_Hit(Address);
+
+        if ( ptrIndex[VictimWay].MESI == 'M' )
+        {
+            char SnoopResult = 0x00;
+            MessageToCache(MSG_GETLINE, Address);
+            BusOperation(BUS_WRITE, Address, &SnoopResult); //SnoopResult Discarded.
+            ptrIndex[VictimWay].Dirty = false;
+        }
+
+        ptrIndex[VictimWay].MESI = 'S';
     }
     else
     {
-        
+        PutSnoopResult(Address, SNP_NOHIT); 
     }
 }
 
@@ -226,11 +338,24 @@ void Cache::SNP_Write(unsigned int Address)
 {
     if (Cache_Hit(Address))
     {
-        /* code */
+        unsigned int  Index = Get_Index(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Snoop_Hit(Address);
+
+        if ( ptrIndex[VictimWay].MESI == 'S' )
+        {
+            ptrIndex[VictimWay].MESI  = 'I';
+            ptrIndex[VictimWay].Valid = false;
+            MessageToCache(MSG_INV_LINE, Address);
+        }
+        else
+        {
+            std::cout << "Error State: Invalid MESI state during SNP_Write" << std::endl;
+        }
     }
     else
     {
-        
+        PutSnoopResult(Address, SNP_NOHIT); 
     }
 }
 
@@ -245,11 +370,24 @@ void Cache::SNP_RWIM(unsigned int Address)
 {
     if (Cache_Hit(Address))
     {
-        /* code */
+        unsigned int  Index = Get_Index(Address);
+        Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Snoop_Hit(Address);
+
+        if ( ptrIndex[VictimWay].MESI == 'M' )
+        {
+            char SnoopResult = 0x00;
+            MessageToCache(MSG_GETLINE, Address);
+            BusOperation(BUS_WRITE, Address, &SnoopResult); //SnoopResult Discarded.
+            ptrIndex[VictimWay].Valid = false;
+        }
+
+        ptrIndex[VictimWay].MESI = 'I';
+        MessageToCache(MSG_INV_LINE, Address);
     }
     else
     {
-        
+        PutSnoopResult(Address, SNP_NOHIT); 
     }
 }
 
