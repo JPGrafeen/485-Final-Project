@@ -12,15 +12,15 @@
 
 
 //--------------------------------------------------------------------------------
-// Description:  Helper Function.  Returns true if tag exists and is valid.
+// Description:  Returns true if tag exists and is valid.
 //
 //--------------------------------------------------------------------------------
-bool Cache_Hit(unsigned int Address)
+bool Cache::Cache_Hit(unsigned int Address)
 {
     unsigned int aIndex = Get_Index(Address);
     unsigned int aTag   = Get_Tag(Address);
 
-    Tag_Array* ptrIndex = &m_TagArray[Index];
+    Tag_Array* ptrIndex = &m_TagArray[aIndex];
 
     bool hit = false;
     for (int i = 0; i < CacheAssc; ++i)
@@ -37,10 +37,10 @@ bool Cache_Hit(unsigned int Address)
 
 
 //--------------------------------------------------------------------------------
-// Description:  Helper Function.  Returns true if tag exists and is modified.
+// Description:  Returns true if tag exists and is modified.
 //
 //--------------------------------------------------------------------------------
-bool Cache_Mod(unsigned int Address)
+bool Cache::Cache_Mod(unsigned int Address)
 {
     unsigned int aIndex = Get_Index(Address);
     unsigned int aTag   = Get_Tag(Address);
@@ -256,11 +256,11 @@ unsigned int Cache::find_PLRU(unsigned int Index)
 //--------------------------------------------------------------------------------
 void Cache::BusOperation(char BusOp, unsigned int Address, char* SnoopResult)
 {
-    SnoopResult = GetSnoopResult(Address);
+    *SnoopResult = GetSnoopResult(Address);
 
     if (!m_DebugMode)
     {
-        printf("BusOp: %d, Address: %h, Snoop Result: %d\n",*SnoopResult);
+        printf("BusOp: %d, Address: %h, Snoop Result: %d\n", BusOp, Address, *SnoopResult);
     }
 }
 
@@ -303,7 +303,7 @@ void Cache::PutSnoopResult(unsigned int Address, char SnoopResult)
 {
     if (!m_DebugMode)
     {
-        printf("SnoopResult: Address %h, SnoopResult: %d\n", Address,SnoopResult);
+        printf("SnoopResult: Address %h, SnoopResult: %d\n", Address, SnoopResult);
     }
 }
 

@@ -26,34 +26,32 @@ int main (int argc, char *argv[])
 		return 3;
 	}
 
-	Cache my_cache;
+	Tag_Array TagArray[NofIndex][CacheAssc];
 
-	Tag_Array_Entry Tag_Array[NofIndex][CacheAssc];
+	Cache my_cache(*TagArray);
 
-	if(my_cache)
+	if(!my_cache)
 	{
-		my_cache.m_TagArray = *Tag_Array;
-	}
-	else
-	{
-		cout << "Error Creating Cache" << endl;
-		return 2;
+		cout << "Error creating cache" << endl;
+		return 2
 	}
 
 	// Parse Arguments
 	string filename;
 	if (argc < 2){ //No filename provided.
+		bool mode;
 		cout << "Please enter filename:" << endl;
 		cin >> filename;
 		cout << "Debug mode? (1/0)" << endl;
-		cin >> m_DebugMode;
+		cin >> mode;
+		my_cache.Set_DebugMode(mode);
 	}
 	else if (argv[1] == "--help"){
 		cout << "Cache Simulator." << endl << "Takes file name/path of a trace file as the first argument." << endl << "Enter '--debug' as the second argument to enter debug mode.";
 	}
 	else{
 		filename = argv[1];
-		m_DebugMode = (argv[2] == "--debug");
+		my_cache.Set_DebugMode(argv[2] == "--debug");
 	}
 
 	// Open file
@@ -79,7 +77,7 @@ int main (int argc, char *argv[])
 		switch(eOperation)
 		{
 		case TRC_L1_DATA_READ:
-			my_cache.L1_Data_Read(Adress);
+			my_cache.L1_Data_Read(Address);
 			break;
 		case TRC_L1_DATA_WRITE:
 			my_cache.L1_Data_Write(Address);
@@ -115,11 +113,11 @@ int main (int argc, char *argv[])
 	}
 	cout << "----------------------------------------------------------------" << endl << endl;
 	cout << "Cache Statistics" << endl << endl << endl;
-	cout << "Reads:  " << my_cache.m_CacheRead  << endl;
-	cout << "Writes: " << my_cache.m_CacheWrite << endl;
-	cout << "Hits:   " << my_cache.m_CacheHit   << endl;
-	cout << "Misses: " << my_cache.m_CacheMiss  << endl;
-	cout << "Ratio:  " << Cache_Ratio()         << endl;
+	cout << "Reads:  " << my_cache.Get_CacheRead()  << endl;
+	cout << "Writes: " << my_cache.Get_CacheWrite() << endl;
+	cout << "Hits:   " << my_cache.Get_CacheHit()   << endl;
+	cout << "Misses: " << my_cache.Get_CacheMiss()  << endl;
+	cout << "Ratio:  " << my_cache.Get_CacheRatio() << endl;
 
 	return 0;
 }

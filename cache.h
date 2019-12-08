@@ -9,10 +9,10 @@
 */
 
 
-#define CacheSize = 2^24   //16MiB
-#define CacheLine = 2^6    //64Bytes
-#define CacheAssc = 2^3    //8-way set associativity
-#define NofIndex  = CacheSize / (CacheLine * CacheAssc)
+#define CacheSize 2^24   //16MiB
+#define CacheLine 2^6    //64Bytes
+#define CacheAssc 2^3    //8-way set associativity
+#define NofIndex  CacheSize / (CacheLine * CacheAssc)
 
 
 class Cache {
@@ -20,7 +20,8 @@ class Cache {
 public:
     
     // Constructor
-    Cache() :
+    Cache(Tag_Array* TagArray) :
+    m_TagArray(TagArray)
     m_DebugMode(false)
     {
         Clear_Cache();
@@ -29,7 +30,7 @@ public:
     // Destructor
     ~Cache(){
         Clear_Cache();
-        Tag_Array = nullptr;
+        m_TagArray = nullptr;
     }
 
 
@@ -60,7 +61,7 @@ public:
         MSG_EVICTLINE  = 4   //L1 should evict the line
     };
 
-private:
+
     void L1_Data_Read(unsigned int Address);
     void L1_Data_Write(unsigned int Address);
     void L1_Inst_Read(unsigned int Address);
@@ -72,19 +73,31 @@ private:
     void Clear_Cache();
     void Print_Cache();
 
+    unsigned int Get_CacheRatio() { return (m_CacheHit / (m_CacheHit + m_CacheMiss)); }
+    unsigned int Get_CacheRead(){ return m_CacheRead; }
+    unsigned int Get_CacheWrite(){ return m_CacheWrite; }
+    unsigned int Get_CacheHit(){ return m_CacheHit; }
+    unsigned int Get_CacheMiss(){ return m_CacheWrite; }
+
+    void Set_DebugMode(bool DebugMode){ m_DebugMode = DebugMode; }
+    bool Get_DebugMode(){ return m_DebugMode; }
+
+
+private:
+    bool Cache_Hit(unsigned int Address);
+    bool Cache_Mod(unsigned int Address);
+
     void update_PLRU(unsigned int Index, unsigned int Way);
     unsigned int find_PLRU(unsigned int Index);
 
-    unsigned int Get_Tag(unsigned int Address){ return (Address>>22); }
-    unsigned int Get_Index(unsigned int Address){ return ((Address && 0x003FFFC0) >> 6); }
+    unsigned int Get_Tag(   unsigned int Address){ return (Address>>22); }
+    unsigned int Get_Index( unsigned int Address){ return ((Address && 0x003FFFC0) >> 6); }
     unsigned int Get_Offset(unsigned int Address){ return (Address && 0x0000003F); }
 
     void BusOperation(char BusOp, unsigned int Address, char* SnoopResult);
     char GetSnoopResult(unsigned int Address);
     void PutSnoopResult(unsigned int Address, char SnoopResult);
     void MessageToCache(char Message, unsigned int Address);
-
-    unsigned int Cache_Ratio() { return (m_CacheHit / (m_CacheHit + m_CacheMiss)); }
 
 
     // Member Variables

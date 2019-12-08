@@ -139,7 +139,7 @@ Output:
 			unsigned int m_CacheHit
 			unsigned int m_CacheMiss
 
-			unsigned int Cache_Ratio()
+			unsigned int Get_CacheRatio()
 			{
 				return (m_CacheHit / (m_CacheHit + m_CacheMiss));
 			}
