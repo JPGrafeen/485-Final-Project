@@ -107,6 +107,7 @@ private:
     // Member Variables
     Tag_Array* m_TagArray;
     bool m_DebugMode;
+    bool m_pLRU[NofIndex][CacheAssc-1];
     unsigned int m_CacheRead;
     unsigned int m_CacheWrite;
     unsigned int m_CacheHit;

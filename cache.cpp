@@ -400,7 +400,15 @@ void Cache::SNP_RWIM(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::Clear_Cache()
 {
-
+    for (int i = 0; i < NofIndex; ++i)
+    {
+        Tag_Array* ptrIndex = &m_TagArray[i];
+        for (int j = 0; j < CacheAssc; ++j)
+        {
+            ptrIndex[j].Valid = false;
+            m_pLRU[i][j]      = false;
+        }
+    }
 }
 
 
@@ -413,7 +421,17 @@ void Cache::Clear_Cache()
 //--------------------------------------------------------------------------------
 void Cache::Print_Cache()
 {
-
+    for (int i = 0; i < NofIndex; ++i)
+    {
+        Tag_Array* ptrIndex = &m_TagArray[i];
+        for (int j = 0; j < CacheAssc; ++j)
+        {
+            if(ptrIndex[j].Valid == true)
+            {
+                printf("Index: %d, Tag: %d, Valid: %d, Dirty: %d, MESI: %c", i, ptrIndex[j].Tag, ptrIndex[j].Valid, ptrIndex[j].Dirty, ptrIndex[j].MESI);
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------------------------
@@ -422,7 +440,7 @@ void Cache::Print_Cache()
 //--------------------------------------------------------------------------------
 void Cache::update_PLRU(unsigned int Index, unsigned int Way)
 {
-    // set which element for the given index is now the LRU
+
 }
 
 //--------------------------------------------------------------------------------
