@@ -79,7 +79,7 @@ public:
     unsigned int Get_CacheRead(){  return m_CacheRead; }
     unsigned int Get_CacheWrite(){ return m_CacheWrite; }
     unsigned int Get_CacheHit(){   return m_CacheHit; }
-    unsigned int Get_CacheMiss(){  return m_CacheWrite; }
+    unsigned int Get_CacheMiss(){  return m_CacheMiss; }
 
     void Set_DebugMode(bool DebugMode){ m_DebugMode = DebugMode; }
     bool Get_DebugMode(){ return m_DebugMode; }
