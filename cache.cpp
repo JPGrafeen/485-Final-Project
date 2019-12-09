@@ -11,26 +11,7 @@
 #include "cache.h"
 
 
-//--------------------------------------------------------------------------------
-// Description: Initializes the cache and resets all state
-//
-//--------------------------------------------------------------------------------
-void Cache::Init_Cache()
-{
-    for (int i = 0; i < NofIndex; ++i)
-    {
-        Tag_Array* ptrIndex = &m_TagArray[i];
-        for (int j = 0; j < CacheAssc; ++j)
-        {
-            ptrIndex[j].Valid = false;
-            ptrIndex[j].Dirty = false;
-            ptrIndex[j].Tag   = 0x00;
-            ptrIndex[j].MESI  = 'I';
 
-            m_pLRU[i][j]      = false;
-        }
-    }
-}
 
 
 //--------------------------------------------------------------------------------
@@ -269,7 +250,7 @@ unsigned int Cache::Snoop_Hit(unsigned int Address)
     unsigned int    Tag = Get_Tag(Address);
     Tag_Array* ptrIndex = &m_TagArray[Index];
     unsigned int VictimWay = 0;
-    for ( ; VictimWay < CacheAssc || ptrIndex[VictimWay].Tag == Tag; ++VictimWay)
+    for ( ; VictimWay < CacheAssc && ptrIndex[VictimWay].Tag != Tag; ++VictimWay)
     {
         //Walk the index
     }
@@ -416,6 +397,28 @@ void Cache::SNP_RWIM(unsigned int Address)
     else
     {
         PutSnoopResult(Address, SNP_NOHIT); 
+    }
+}
+
+
+//--------------------------------------------------------------------------------
+// Description: Initializes the cache and resets all state
+//
+//--------------------------------------------------------------------------------
+void Cache::Init_Cache()
+{
+    for (int i = 0; i < NofIndex; ++i)
+    {
+        Tag_Array* ptrIndex = &m_TagArray[i];
+        for (int j = 0; j < CacheAssc; ++j)
+        {
+            ptrIndex[j].Valid = false;
+            ptrIndex[j].Dirty = false;
+            ptrIndex[j].Tag   = 0x00;
+            ptrIndex[j].MESI  = 'I';
+
+            m_pLRU[i][j]      = false;
+        }
     }
 }
 
