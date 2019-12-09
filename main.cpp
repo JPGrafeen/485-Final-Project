@@ -123,7 +123,7 @@ int main (int argc, char *argv[])
 		printf( "Writes: %d \n", my_cache.Get_CacheWrite() );
 		printf( "Hits:   %d \n", my_cache.Get_CacheHit()   );
 		printf( "Misses: %d \n", my_cache.Get_CacheMiss()  );
-		printf( "Ratio:  %f \n\n\n", my_cache.Get_CacheRatio() );
+		printf( "Ratio:  %.10f \n\n\n", my_cache.Get_CacheRatio() );
 
 		file.close();
 		return 0;
