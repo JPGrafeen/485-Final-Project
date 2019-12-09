@@ -157,7 +157,7 @@ void Cache::L1_Data_Write(unsigned int Address)
         ++m_CacheHit;
         for (VictimWay = 0; VictimWay < CacheAssc || ptrIndex[VictimWay].Tag == Tag; ++VictimWay)
         {
-            //Walk the index
+            printf("Searching for %d, Current tag: %d", Tag, ptrIndex[VictimWay].Tag);
         }
 
         // Check Error States
