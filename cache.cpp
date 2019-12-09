@@ -476,27 +476,27 @@ void Cache::update_PLRU(unsigned int Index, unsigned int Way)
     {
         case 0: 
         case 1: 
-            m_pLRU[Index][0] != m_pLRU[Index][0]; 
-            m_pLRU[Index][1] != m_pLRU[Index][1]; 
-            m_pLRU[Index][3] != m_pLRU[Index][3]; 
+            m_pLRU[Index][0] = !m_pLRU[Index][0]; 
+            m_pLRU[Index][1] = !m_pLRU[Index][1]; 
+            m_pLRU[Index][3] = !m_pLRU[Index][3]; 
             break;
         case 2: 
         case 3: 
-            m_pLRU[Index][0] != m_pLRU[Index][0]; 
-            m_pLRU[Index][1] != m_pLRU[Index][1]; 
-            m_pLRU[Index][4] != m_pLRU[Index][4]; 
+            m_pLRU[Index][0] = !m_pLRU[Index][0]; 
+            m_pLRU[Index][1] = !m_pLRU[Index][1]; 
+            m_pLRU[Index][4] = !m_pLRU[Index][4]; 
             break;
         case 4: 
         case 5: 
-            m_pLRU[Index][0] != m_pLRU[Index][0]; 
-            m_pLRU[Index][2] != m_pLRU[Index][2]; 
-            m_pLRU[Index][5] != m_pLRU[Index][5]; 
+            m_pLRU[Index][0] = !m_pLRU[Index][0]; 
+            m_pLRU[Index][2] = !m_pLRU[Index][2]; 
+            m_pLRU[Index][5] = !m_pLRU[Index][5]; 
             break;
         case 6: 
         case 7: 
-            m_pLRU[Index][0] != m_pLRU[Index][0]; 
-            m_pLRU[Index][2] != m_pLRU[Index][2]; 
-            m_pLRU[Index][6] != m_pLRU[Index][6]; 
+            m_pLRU[Index][0] = !m_pLRU[Index][0]; 
+            m_pLRU[Index][2] = !m_pLRU[Index][2]; 
+            m_pLRU[Index][6] = !m_pLRU[Index][6]; 
             break;
     }
 }
