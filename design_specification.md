@@ -14,21 +14,25 @@ Assumptions:
 
 	These assumptions will help maintain inclusivity.
 
+	Professoritorial Assumptions: The usage of an unsigned int in the required debug print statements, which is either 2 or 4 bytes depending on the compiler, indicates the address length is either 16b or 32b. As 16b is too small to fit the required offset, and index, 32b is assumed for the address length.
+
+	Professoritorial Assumptions: The eviction policy should first verify that there are no open lines to copy into. Eviction should only occur if all lines are valid and a L1 Read or Write occurs. 
+
 
 Cache:
 	Cache is 16MiB, uses 64B lines, and is 8-way set associative using an undefined address size.
-		64B * 8 = 256B/index
-		16MiB / 256B = 64Ki indexs   (65,536)
+		64B * 8 = 512B/index
+		16MiB / 512B = 32Ki indexs
 
 		Log2(64) = 6'b
-		log2(64K) = 16'b
+		log2(32K) = 15'b
 
 		Write-Allocate miss action: Write data on to block on miss1
 
 	addressing:
 		[00-05] Byte Select
-		[06-21] Index
-		[22-xx] Tag
+		[06-20] Index
+		[21-32] Tag
 
 Programming Container:
 	struct array of [index][way]
