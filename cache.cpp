@@ -161,10 +161,15 @@ void Cache::L1_Data_Write(unsigned int Address)
         }
 
         // Check Error States
-        if ( VictimWay >= CacheAssc
-          || ptrIndex[VictimWay].Valid == false)
+        if ( VictimWay >= CacheAssc)
         {
-            std::cout << "Error State: Contents of Index changed during L1_Data_Write" << std::endl;
+            std::cout << "Error State: Inside Cache_hit but unable to find matching Tag" << std::endl;
+            return;
+        }
+
+        if ( ptrIndex[VictimWay].Valid == false )
+        {
+            std::cout << "Error State: Inside Cache_Hit but Valid bit is false" << std::endl;
             return;
         }
 

@@ -42,7 +42,7 @@ public:
     {
         bool         Valid;      // Valid bit, data is able to be read or modified
         bool         Dirty;      // Dirty bit, data has been modified
-        char         MESI;       // 1 hot encoding of the MESI states using 8'b vector
+        char         MESI;       // encoded MESI state
         unsigned int Tag;        // Data tag
     };
     typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system.
