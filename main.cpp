@@ -112,19 +112,18 @@ int main (int argc, char *argv[])
 			}
 		}
 
-		// Laxy programming to clear the screen
+		// Lazy programming to clear the screen
 		for (int i = 0; i < 64; ++i)
 		{
 			cout << endl;
 		}
-		cout << "----------------------------------------------------------------" << endl << endl;
-		cout << "Cache Statistics" << endl << endl << endl;
-		cout << "Reads:  " << my_cache.Get_CacheRead()  << endl;
-		cout << "Writes: " << my_cache.Get_CacheWrite() << endl;
-		cout << "Hits:   " << my_cache.Get_CacheHit()   << endl;
-		cout << "Misses: " << my_cache.Get_CacheMiss()  << endl;
-		cout << "Ratio:  " << my_cache.Get_CacheRatio() << endl;
-		cout << endl << endl;
+		printf( "----------------------------------------------------------------\n\n" );
+		printf( "Cache Statistics\n\n\n");
+		printf( "Reads:  %d \n", my_cache.Get_CacheRead()  );
+		printf( "Writes: %d \n", my_cache.Get_CacheWrite() );
+		printf( "Hits:   %d \n", my_cache.Get_CacheHit()   );
+		printf( "Misses: %d \n", my_cache.Get_CacheMiss()  );
+		printf( "Ratio:  %f \n\n\n", my_cache.Get_CacheRatio() );
 
 		file.close();
 		return 0;
@@ -137,4 +136,4 @@ int main (int argc, char *argv[])
 
 // ---------------
 // EOF
-// ---------------
+// --------------
