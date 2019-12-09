@@ -645,14 +645,14 @@ void Cache::MessageToCache(char Message, unsigned int Address)
 //--------------------------------------------------------------------------------
 double Cache::Get_CacheRatio()
 {
-	// Dividing by zero releases Chuthulu
-	if ( m_CacheHit  == 0
-	  && m_CacheMiss == 0)
+	// Dividing by zero releases Cthulhu
+	if ( m_CacheHit  == 0.0
+	  && m_CacheMiss == 0.0)
 	{
 		return 0.0;
 	}
 
-	return ( static_cast<double>(m_CacheHit) / static_cast<double>(m_CacheHit + m_CacheMiss) );
+	return ( m_CacheHit / (m_CacheHit + m_CacheMiss) );
 }
 
 // ---------------
