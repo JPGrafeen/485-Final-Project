@@ -29,7 +29,8 @@ bool Cache::Cache_Hit(unsigned int Address)
     for (int i = 0; i < CacheAssc; ++i)
     {
         // If Tag is present and Valid
-        if (ptrIndex[i].Tag == Tag && ptrIndex[i].Valid)
+        if ( ptrIndex[i].Tag == Tag 
+          && ptrIndex[i].Valid)
         {
             Hit = true;
             //printf("Searching for %d --- Found Tag-%d\n", Tag, ptrIndex[i].Tag);
@@ -93,11 +94,7 @@ void Cache::L1_Data_Read(unsigned int Address)
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
         Tag_Array* ptrIndex = &m_TagArray[Index];
-        unsigned int VictimWay = find_PLRU(Index);
-        if (ptrIndex[VictimWay].Dirty)
-        {
-            VictimWay = Evict_Line(Address, &SnoopResult);
-        }
+        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
 
         BusOperation(BUS_READ, Address, &SnoopResult);
         ptrIndex[VictimWay].Valid = true;
@@ -189,7 +186,6 @@ void Cache::L1_Data_Write(unsigned int Address)
         ptrIndex[VictimWay].Dirty = true;
         ptrIndex[VictimWay].Tag   = Tag;
         ptrIndex[VictimWay].MESI  = 'M';
-
     }
 
     ++m_CacheWrite;
@@ -218,12 +214,8 @@ void Cache::L1_Inst_Read(unsigned int Address)
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
         Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
 
-        unsigned int VictimWay = find_PLRU(Index);
-        if (ptrIndex[VictimWay].Dirty)
-        {
-            VictimWay = Evict_Line(Address, &SnoopResult);
-        }
         BusOperation(BUS_READ, Address, &SnoopResult);
 
         ptrIndex[VictimWay].Valid = true;
