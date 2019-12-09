@@ -93,24 +93,24 @@ void Cache::L1_Data_Read(unsigned int Address)
         char    SnoopResult = 0x00;
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
-        Tag_Array* ptrIndex = &m_TagArray[Index];
-        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
+        //Tag_Array* ptrIndex = &m_TagArray[Index];
+        unsigned int VictimWay = Evict_Line(Address, &SnoopResult); // discarded SnoopResult
 
-        BusOperation(BUS_READ, Address, &SnoopResult);
-        ptrIndex[VictimWay].Valid = true;
-        ptrIndex[VictimWay].Dirty = false;
-        ptrIndex[VictimWay].Tag   = Tag;
+        BusOperation(BUS_READ, Address, &SnoopResult); // Used SnoopResult
+        (&m_TagArray)[Index][VictimWay].Valid = true;
+        (&m_TagArray)[Index][VictimWay].Dirty = false;
+        (&m_TagArray)[Index][VictimWay].Tag   = Tag;
 
         if ( SnoopResult == SNP_HIT
           || SnoopResult == SNP_HITM)
         {
             // Another LLC reported having a copy, go to Shared
-            ptrIndex[VictimWay].MESI = 'S';
+            (&m_TagArray)[Index][VictimWay].MESI = 'S';
         }
         else
         {
             // No other LLC reported having a copy, go to Exclusive
-            ptrIndex[VictimWay].MESI = 'E';
+            (&m_TagArray)[Index][VictimWay].MESI = 'E';
         }
     }
 
