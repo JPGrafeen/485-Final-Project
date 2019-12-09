@@ -51,7 +51,7 @@ bool Cache::Cache_Hit(unsigned int Address)
         if (ptrIndex[i].Tag == Tag && ptrIndex[i].Valid)
         {
             Hit = true;
-            printf("Searching for %d --- Found Tag-%d\n", Tag, ptrIndex[i].Tag);
+            //printf("Searching for %d --- Found Tag-%d\n", Tag, ptrIndex[i].Tag);
         }
     }
 
@@ -156,9 +156,9 @@ void Cache::L1_Data_Write(unsigned int Address)
     if (Cache_Hit(Address))
     {
         ++m_CacheHit;
-        for (VictimWay = 0; VictimWay < CacheAssc || ptrIndex[VictimWay].Tag == Tag; ++VictimWay)
+        for (VictimWay = 0; VictimWay < CacheAssc && ptrIndex[VictimWay].Tag != Tag; ++VictimWay)
         {
-            printf("%d: Searching for %d, Current tag: %d\n", VictimWay, Tag, ptrIndex[VictimWay].Tag);
+            //printf("%d: Searching for %d, Current tag: %d\n", VictimWay, Tag, ptrIndex[VictimWay].Tag);
         }
 
         // Check Error States
