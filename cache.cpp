@@ -93,9 +93,13 @@ void Cache::L1_Data_Read(unsigned int Address)
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
         Tag_Array* ptrIndex = &m_TagArray[Index];
-        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
-        BusOperation(BUS_READ, Address, &SnoopResult);
+        unsigned int VictimWay = find_PLRU(Index);
+        if (ptrIndex[VictimWay].Dirty)
+        {
+            VictimWay = Evict_Line(Address, &SnoopResult);
+        }
 
+        BusOperation(BUS_READ, Address, &SnoopResult);
         ptrIndex[VictimWay].Valid = true;
         ptrIndex[VictimWay].Dirty = false;
         ptrIndex[VictimWay].Tag   = Tag;
@@ -214,7 +218,12 @@ void Cache::L1_Inst_Read(unsigned int Address)
         unsigned int  Index = Get_Index(Address);
         unsigned int    Tag = Get_Tag(Address);
         Tag_Array* ptrIndex = &m_TagArray[Index];
-        unsigned int VictimWay = Evict_Line(Address, &SnoopResult);
+
+        unsigned int VictimWay = find_PLRU(Index);
+        if (ptrIndex[VictimWay].Dirty)
+        {
+            VictimWay = Evict_Line(Address, &SnoopResult);
+        }
         BusOperation(BUS_READ, Address, &SnoopResult);
 
         ptrIndex[VictimWay].Valid = true;
@@ -453,6 +462,7 @@ void Cache::Clear_Cache()
 //--------------------------------------------------------------------------------
 void Cache::Print_Cache()
 {
+    //printf("\nPrint called!\n");
     for (int i = 0; i < NofIndex; ++i)
     {
         Tag_Array* ptrIndex = &m_TagArray[i];
@@ -460,7 +470,7 @@ void Cache::Print_Cache()
         {
             if(ptrIndex[j].Valid == true)
             {
-                printf("Index: %d, Tag: %d, Valid: %d, Dirty: %d, MESI: %c", i, ptrIndex[j].Tag, ptrIndex[j].Valid, ptrIndex[j].Dirty, ptrIndex[j].MESI);
+                printf("Index: %d, Tag: %d, Valid: %d, Dirty: %d, MESI: %c\n", i, ptrIndex[j].Tag, ptrIndex[j].Valid, ptrIndex[j].Dirty, ptrIndex[j].MESI);
             }
         }
     }
@@ -577,7 +587,7 @@ void Cache::BusOperation(char BusOp, unsigned int Address, char* SnoopResult)
 
     if (m_DebugMode)
     {
-        printf("BusOp: %d, Address: %x, Snoop Result: %d\n", BusOp, Address, *SnoopResult);
+        printf("Bus Operation: BusOp = %d, address = %x, snoop Result = %d\n", BusOp, Address, *SnoopResult);
     }
 }
 
@@ -621,7 +631,7 @@ void Cache::PutSnoopResult(unsigned int Address, char SnoopResult)
 {
     if (m_DebugMode)
     {
-        printf("SnoopResult: Address %x, SnoopResult: %d \n", Address, SnoopResult);
+        printf("SnoopResult: SnoopResult = %d, Address = %x \n", SnoopResult,  Address);
     }
 }
 
@@ -634,7 +644,7 @@ void Cache::MessageToCache(char Message, unsigned int Address)
 {
     if (m_DebugMode)
     {
-        printf("L2: %d %x \n", Message, Address);
+        printf("L2 to L1: message = %d, address = %x \n", Message, Address);
     }
 }
 
