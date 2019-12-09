@@ -1,7 +1,7 @@
 /*  Fall 2019
 *   JP Grafeen
 *   Jordan Bergmann
-*   Kelly 
+*   Kelly Makinster
 *
 *   ECE 485 Final Project
 *

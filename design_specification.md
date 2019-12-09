@@ -1,3 +1,12 @@
+/*  Fall 2019
+*   JP Grafeen
+*   Jordan Bergmann
+*   Kelly Makinster
+*
+*   Design Specification used for programming cache operations
+*/
+
+
 Assumptions:
 	Write-hit action is not defined for the L2 cache. We have decided to use a Write-Back policy for the hit action.
 
