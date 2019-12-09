@@ -75,7 +75,7 @@ public:
     void Clear_Cache();
     void Print_Cache();
 
-    float        Get_CacheRatio(); //(m_CacheHit / (m_CacheHit + m_CacheMiss))
+    double       Get_CacheRatio(); //(m_CacheHit / (m_CacheHit + m_CacheMiss))
     unsigned int Get_CacheRead(){  return m_CacheRead; }
     unsigned int Get_CacheWrite(){ return m_CacheWrite; }
     unsigned int Get_CacheHit(){   return m_CacheHit; }

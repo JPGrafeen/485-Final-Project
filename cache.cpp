@@ -472,7 +472,33 @@ void Cache::Print_Cache()
 //--------------------------------------------------------------------------------
 void Cache::update_PLRU(unsigned int Index, unsigned int Way)
 {
-
+    switch(Way)
+    {
+        case 0: 
+        case 1: 
+            m_pLRU[Index][0] != m_pLRU[Index][0]; 
+            m_pLRU[Index][1] != m_pLRU[Index][1]; 
+            m_pLRU[Index][3] != m_pLRU[Index][3]; 
+            break;
+        case 2: 
+        case 3: 
+            m_pLRU[Index][0] != m_pLRU[Index][0]; 
+            m_pLRU[Index][1] != m_pLRU[Index][1]; 
+            m_pLRU[Index][4] != m_pLRU[Index][4]; 
+            break;
+        case 4: 
+        case 5: 
+            m_pLRU[Index][0] != m_pLRU[Index][0]; 
+            m_pLRU[Index][2] != m_pLRU[Index][2]; 
+            m_pLRU[Index][5] != m_pLRU[Index][5]; 
+            break;
+        case 6: 
+        case 7: 
+            m_pLRU[Index][0] != m_pLRU[Index][0]; 
+            m_pLRU[Index][2] != m_pLRU[Index][2]; 
+            m_pLRU[Index][6] != m_pLRU[Index][6]; 
+            break;
+    }
 }
 
 //--------------------------------------------------------------------------------
@@ -481,7 +507,62 @@ void Cache::update_PLRU(unsigned int Index, unsigned int Way)
 //--------------------------------------------------------------------------------
 unsigned int Cache::find_PLRU(unsigned int Index)
 {
-    return 0;
+    bool* pLRUIndex = m_pLRU[Index];
+
+    unsigned int VictimWay = 0;
+
+    if ( pLRUIndex[0] == false )
+    {
+        if ( pLRUIndex[1] == false )
+        {
+            if ( pLRUIndex[3] == false )
+            {
+                VictimWay = 0;
+            }
+            else
+            {
+                VictimWay = 1;
+            }
+        }
+        else
+        {
+            if ( pLRUIndex[4] == false )
+            {
+                VictimWay = 2;
+            }
+            else
+            {
+                VictimWay = 3;
+            }
+        }
+    }
+    else
+    {
+        if ( pLRUIndex[2] == false )
+        {
+            if ( pLRUIndex[5] == false )
+            {
+                VictimWay = 4;
+            }
+            else
+            {
+                VictimWay = 5;
+            }
+        }
+        else
+        {
+            if ( pLRUIndex[6] == false )
+            {
+                VictimWay = 6;
+            }
+            else
+            {
+                VictimWay = 7;
+            }
+        }
+    }
+
+    return VictimWay;
 }
 
 
@@ -562,7 +643,7 @@ void Cache::MessageToCache(char Message, unsigned int Address)
 // Description: Returns the Cache hit ratio
 //
 //--------------------------------------------------------------------------------
-float Cache::Get_CacheRatio()
+double Cache::Get_CacheRatio()
 {
 	// Dividing by zero releases Chuthulu
 	if ( m_CacheHit  == 0
@@ -571,7 +652,7 @@ float Cache::Get_CacheRatio()
 		return 0.0;
 	}
 
-	return ( static_cast<float>(m_CacheHit) / static_cast<float>(m_CacheHit + m_CacheMiss) );
+	return ( static_cast<double>(m_CacheHit) / static_cast<double>(m_CacheHit + m_CacheMiss) );
 }
 
 // ---------------
