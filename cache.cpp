@@ -571,7 +571,7 @@ float Cache::Get_CacheRatio()
 		return 0.0;
 	}
 
-	return ( m_CacheHit / (m_CacheHit + m_CacheMiss));
+	return ( static_cast<float>(m_CacheHit) / static_cast<float>(m_CacheHit + m_CacheMiss) );
 }
 
 // ---------------
