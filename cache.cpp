@@ -458,7 +458,7 @@ void Cache::Print_Cache()
         {
             if(m_TagArray[i][j].Valid == true)
             {
-                printf("Index: %d, Tag: %d, Valid: %d, Dirty: %d, MESI: %c\n", i, m_TagArray[i][j].Tag, m_TagArray[i][j].Valid, m_TagArray[i][j].Dirty, m_TagArray[i][j].MESI);
+                printf("Index: %d, Way: %d, Tag: %d, Valid: %d, Dirty: %d, MESI: %c\n", i, j, m_TagArray[i][j].Tag, m_TagArray[i][j].Valid, m_TagArray[i][j].Dirty, m_TagArray[i][j].MESI);
             }
         }
     }
