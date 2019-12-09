@@ -52,7 +52,7 @@ public:
     m_TagArray(TagArray),
     m_DebugMode(false)
     {
-        Clear_Cache();
+        Init_Cache();
     }
 
     // Destructor
@@ -71,6 +71,7 @@ public:
     void SNP_Write(unsigned int Address);
     void SNP_RWIM(unsigned int Address);
 
+    void Init_Cache();
     void Clear_Cache();
     void Print_Cache();
 

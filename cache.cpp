@@ -12,6 +12,28 @@
 
 
 //--------------------------------------------------------------------------------
+// Description: Initializes the cache and resets all state
+//
+//--------------------------------------------------------------------------------
+void Cache::Init_Cache()
+{
+    for (int i = 0; i < NofIndex; ++i)
+    {
+        Tag_Array* ptrIndex = &m_TagArray[i];
+        for (int j = 0; j < CacheAssc; ++j)
+        {
+            ptrIndex[j].Valid = false;
+            ptrIndex[j].Dirty = false;
+            ptrIndex[j].Tag   = 0x00;
+            ptrIndex[j].MESI  = 'I';
+
+            m_pLRU[i][j]      = false;
+        }
+    }
+}
+
+
+//--------------------------------------------------------------------------------
 // Description:  Returns true if tag exists and is valid.
 //
 //--------------------------------------------------------------------------------
@@ -406,6 +428,7 @@ void Cache::Clear_Cache()
         for (int j = 0; j < CacheAssc; ++j)
         {
             ptrIndex[j].Valid = false;
+            ptrIndex[j].MESI  = 'I';
             m_pLRU[i][j]      = false;
         }
     }
