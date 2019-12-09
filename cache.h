@@ -48,8 +48,7 @@ public:
     typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system.
 
     // Constructor
-    Cache(Tag_Array* TagArray) :
-    m_TagArray(TagArray),
+    Cache() :
     m_DebugMode(false)
     {
         Init_Cache();
@@ -59,7 +58,6 @@ public:
     ~Cache()
     {
         Clear_Cache();
-        m_TagArray = nullptr;
     }
 
 
@@ -106,7 +104,7 @@ private:
 
 
     // Member Variables
-    Tag_Array* m_TagArray;
+    Tag_Array m_TagArray[NofIndex][CacheAssc];
     bool m_DebugMode;
     bool m_pLRU[NofIndex][CacheAssc-1];
     double m_CacheRead;

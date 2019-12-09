@@ -27,8 +27,7 @@ int main (int argc, char *argv[])
 	}
 
 	// create cache object and initialize.
-	Cache::Tag_Array TagArray[NofIndex][CacheAssc];
-	Cache my_cache(*TagArray);
+	Cache my_cache;
 
 
 	// Parse Arguments
@@ -113,10 +112,6 @@ int main (int argc, char *argv[])
 		}
 
 		// Lazy programming to clear the screen
-		for (int i = 0; i < 64; ++i)
-		{
-			cout << endl;
-		}
 		printf( "----------------------------------------------------------------\n\n" );
 		printf( "Cache Statistics\n\n\n");
 		printf( "Reads:  %d \n", my_cache.Get_CacheRead()  );
