@@ -462,6 +462,7 @@ void Cache::Print_Cache()
             }
         }
     }
+    printf("\n\n");
 }
 
 
