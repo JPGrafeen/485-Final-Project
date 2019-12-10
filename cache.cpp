@@ -11,9 +11,6 @@
 #include "cache.h"
 
 
-
-
-
 //--------------------------------------------------------------------------------
 // Description:  Returns true if tag exists and is valid.
 //
@@ -31,7 +28,6 @@ bool Cache::Cache_Hit(unsigned int Address)
           && m_TagArray[Index][i].Valid)
         {
             Hit = true;
-            //printf("Searching for %d --- Found Tag-%d\n", Tag, m_TagArray[Index][i].Tag);
         }
     }
 
@@ -138,7 +134,7 @@ void Cache::L1_Data_Write(unsigned int Address)
         ++m_CacheHit;
         for (VictimWay = 0; VictimWay < CacheAssc && m_TagArray[Index][VictimWay].Tag != Tag; ++VictimWay)
         {
-            //printf("%d: Searching for %d, Current tag: %d\n", VictimWay, Tag, m_TagArray[Index][VictimWay].Tag);
+            //find victim
         }
 
         // Check Error States
