@@ -34,16 +34,16 @@ int Cache::Find_Way(unsigned int Address)
     return -1;
 }
 
+
 //--------------------------------------------------------------------------------
-// Description:  Common Algorithm for responding to a request for a line. Writes 
+// Description:  Common Algorithm for bus interaction with Main Memory. Writes 
 //               back if modified and updates the MRU way.
 //
 //               Returns the first invalid Way or the LRU Way.
 //
 //--------------------------------------------------------------------------------
-int Cache::Process_Line(unsigned int Address)
+int Cache::Process_Line(char BusOp, unsigned int Address, char* SnoopResult)
 {
-    char         SnoopResult = 0x00;
     unsigned int Index       = Get_Index(Address);
     int          VictimWay   = 0;
 
@@ -53,18 +53,29 @@ int Cache::Process_Line(unsigned int Address)
         // Do nothing
     }
 
+    // If no invalids, find Least Recently Used, sends Evict Line to L1.
     if (VictimWay >= CacheAssc)
     {
         VictimWay = find_LRU(Index);
+
+        // If Modified, write back
         if (m_TagArray[Index][VictimWay].MESI == 'M')
         {
             MessageToCache(MSG_GETLINE, Address);
-            BusOperation(BUS_WRITE, Address, &SnoopResult); //SnoopResult discarded
+            BusOperation(BUS_WRITE, Address, SnoopResult); //SnoopResult discarded
         }
         MessageToCache(MSG_EVICTLINE, Address);
     }
 
     update_MRU(Index, VictimWay);
+
+    // Read from Main Memory
+    BusOperation(BusOp, Address, SnoopResult);
+
+    // Put data in selected way
+    unsigned int Tag = Get_Tag(Address);
+    m_TagArray[Index][VictimWay].Tag = Tag;
+
     return VictimWay;
 }
 
@@ -81,14 +92,9 @@ void Cache::L1_Data_Read(unsigned int Address)
     {
         ++m_CacheMiss;
 
-        char         SnoopResult = 0x00;
-        unsigned int       Index = Get_Index(Address);
-        unsigned int         Tag = Get_Tag(Address);
-
-        VictimWay = Process_Line(Address);
-        m_TagArray[Index][VictimWay].Tag = Tag;
-
-        BusOperation(BUS_READ, Address, &SnoopResult);
+        char SnoopResult = 0x00;
+        unsigned int Index = Get_Index(Address);
+        VictimWay = Process_Line(BUS_READ, Address, &SnoopResult);
 
         if ( SnoopResult == SNP_HIT
           || SnoopResult == SNP_HITM)
@@ -121,34 +127,29 @@ void Cache::L1_Data_Read(unsigned int Address)
 //--------------------------------------------------------------------------------
 void Cache::L1_Data_Write(unsigned int Address)
 {
-
-    char         SnoopResult = 0x00;
-    unsigned int       Index = Get_Index(Address);
-    unsigned int         Tag = Get_Tag(Address);
-    int            VictimWay = Find_Way(Address);
-
+    int VictimWay = Find_Way(Address);
 
     if (CACHE_MISS == VictimWay)
     {
         ++m_CacheMiss;
 
-        VictimWay = Process_Line(Address);
-
-        BusOperation(BUS_RWIM, Address, &SnoopResult); // SnoopResult discarded
-
-        m_TagArray[Index][VictimWay].Tag   = Tag;
+        char SnoopResult = 0x00;
+        VictimWay = Process_Line(BUS_RWIM, Address, &SnoopResult); //SnoopResult discarded
     }
     else
     {
         ++m_CacheHit;
 
+        unsigned int Index = Get_Index(Address);
         if (m_TagArray[Index][VictimWay].MESI == 'S')
         {
+            char SnoopResult = 0x00;
             BusOperation(BUS_INV, Address, &SnoopResult); // SnoopResult discarded
         }
     }
 
     ++m_CacheWrite;
+    unsigned int Index = Get_Index(Address);
     m_TagArray[Index][VictimWay].MESI  = 'M';
     MessageToCache(MSG_SENDLINE, Address);
 }
@@ -168,14 +169,9 @@ void Cache::L1_Inst_Read(unsigned int Address)
     {
         ++m_CacheMiss;
 
-        char    SnoopResult = 0x00;
-        unsigned int  Index = Get_Index(Address);
-        unsigned int    Tag = Get_Tag(Address);
-
-        VictimWay = Process_Line(Address);
-        m_TagArray[Index][VictimWay].Tag = Tag;
-
-        BusOperation(BUS_READ, Address, &SnoopResult);
+        char SnoopResult = 0x00;
+        unsigned int Index = Get_Index(Address);
+        VictimWay = Process_Line(BUS_READ, Address, &SnoopResult);
 
         if ( SnoopResult == SNP_HIT
           || SnoopResult == SNP_HITM)

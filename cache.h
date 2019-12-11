@@ -81,12 +81,12 @@ public:
 
 private:
     int Find_Way(unsigned int Address);
-    int Process_Line(unsigned int Address);
+    int Process_Line(char BusOp, unsigned int Address, char* SnoopResult);
 
     void update_MRU(unsigned int Index, unsigned int Way);
     int    find_LRU(unsigned int Index);
 
-    unsigned int Get_Tag(   unsigned int Address){ return ( Address>>21); }
+    unsigned int Get_Tag(   unsigned int Address){ return ( Address >> 21); }
     unsigned int Get_Index( unsigned int Address){ return ((Address &= 0x001FFFC0) >> 6); }
     unsigned int Get_Offset(unsigned int Address){ return ( Address &= 0x0000003F); }
 
