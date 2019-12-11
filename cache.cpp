@@ -31,7 +31,7 @@ int Cache::Find_Way(unsigned int Address)
         }
     }
 
-    return -1;
+    return CACHE_MISS;
 }
 
 

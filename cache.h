@@ -32,7 +32,7 @@
 #define MSG_INV_LINE  0x03  //L1 should invalidate the line
 #define MSG_EVICTLINE 0x04  //L1 should evict the line
 
-#define CACHE_MISS    0x80000000 // Encoded Miss Message. HEX for -0
+#define CACHE_MISS    (int)0x80000000 // Encoded Miss Message. HEX for -0 in Two's Compliment
 
 //#define DEBUG true
 
