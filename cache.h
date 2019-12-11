@@ -32,6 +32,13 @@
 #define MSG_INV_LINE  0x03  //L1 should invalidate the line
 #define MSG_EVICTLINE 0x04  //L1 should evict the line
 
+#define CACHE_MISS    0x80000000 // Encoded Miss Message. HEX for -0
+
+//#define DEBUG true
+
+#ifndef DEBUG
+    #define DEBUG false
+#endif
 
 class Cache 
 {
@@ -40,26 +47,16 @@ public:
 
     struct Tag_Array_Entry
     {
-        bool         Valid;      // Valid bit, data is able to be read or modified
-        bool         Dirty;      // Dirty bit, data has been modified
         char         MESI;       // encoded MESI state
         unsigned int Tag;        // Data tag
     };
     typedef Tag_Array_Entry Tag_Array; //renaming makes it easier to conceptualize in an n-way system.
 
     // Constructor
-    Cache() :
-    m_DebugMode(false)
-    {
-        Init_Cache();
-    }
-
-    // Destructor
-    ~Cache()
+    Cache()
     {
         Clear_Cache();
     }
-
 
     void L1_Data_Read(unsigned int Address);
     void L1_Data_Write(unsigned int Address);
@@ -69,29 +66,25 @@ public:
     void SNP_Write(unsigned int Address);
     void SNP_RWIM(unsigned int Address);
 
-    void Init_Cache();
     void Clear_Cache();
     void Print_Cache();
 
-    double       Get_CacheRatio(); //(m_CacheHit / (m_CacheHit + m_CacheMiss))
+    double       Get_CacheRatio(){ return ( ((m_CacheHit + m_CacheMiss) == 0.0) ? 0.0 : (m_CacheHit / (m_CacheHit + m_CacheMiss)) ); }
     unsigned int Get_CacheRead(){  return m_CacheRead; }
     unsigned int Get_CacheWrite(){ return m_CacheWrite; }
     unsigned int Get_CacheHit(){   return m_CacheHit; }
     unsigned int Get_CacheMiss(){  return m_CacheMiss; }
 
-    void Set_DebugMode(bool DebugMode){ m_DebugMode = DebugMode; }
-    bool Get_DebugMode(){ return m_DebugMode; }
+    void Set_SilentMode(bool SilentMode){ m_SilentMode = SilentMode; }
+    bool Get_SilentMode(){ return m_SilentMode; }
 
 
 private:
-    bool Cache_Hit(unsigned int Address);
+    int Find_Way(unsigned int Address);
+    int Process_Line(unsigned int Address);
 
-    unsigned int Evict_Line(unsigned int Address, char* SnoopResult);
-
-    unsigned int Snoop_Hit(unsigned int Address);
-
-    void update_PLRU(unsigned int Index, unsigned int Way);
-    unsigned int find_PLRU(unsigned int Index);
+    void update_MRU(unsigned int Index, unsigned int Way);
+    int    find_LRU(unsigned int Index);
 
     unsigned int Get_Tag(   unsigned int Address){ return ( Address>>21); }
     unsigned int Get_Index( unsigned int Address){ return ((Address &= 0x001FFFC0) >> 6); }
@@ -105,7 +98,7 @@ private:
 
     // Member Variables
     Tag_Array m_TagArray[NofIndex][CacheAssc];
-    bool m_DebugMode;
+    bool m_SilentMode;
     bool m_pLRU[NofIndex][CacheAssc-1];
     double m_CacheRead;
     double m_CacheWrite;

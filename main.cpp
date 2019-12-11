@@ -38,9 +38,9 @@ int main (int argc, char *argv[])
 		bool mode;
 		cout << "Please enter filename:" << endl;
 		cin >> filename;
-		cout << "Debug mode? (1/0)" << endl;
+		cout << "Silent mode? (1/0)" << endl;
 		cin >> mode;
-		my_cache.Set_DebugMode(mode);
+		my_cache.Set_SilentMode(mode);
 	}
 	else if (argv[1])
 	{
@@ -49,17 +49,22 @@ int main (int argc, char *argv[])
 		{
 			cout << "Cache Simulator." << endl;
 			cout << "Takes file name/path of a trace file as the first argument." << endl;
-			cout << "Enter '--debug' as the second argument to enter debug mode." << endl << endl;
+			cout << "Enter '--silent' as the second argument to enter silent mode." << endl << endl;
+			cout << "Silent Mode: Simulation will only print to screen responses to a" << endl;
+			cout << "           '9'  from the trace file and the usage statistics at the" << endl;
+			cout << "            completion of the run." << endl << endl;
+			cout << "Default Mode:   Displays bus operations, reported snoop results," << endl;
+			cout << "           and communication messages to higher level cache (L1)" << endl << endl;
 			return 0;
 		}
-		else if (filename == "--debug")
+		else if (filename == "--silent")
 		{
 			cout << "No file name given" << endl;
 		}
 		else if (argv[2])
 		{
 			mode = argv[2];
-			my_cache.Set_DebugMode((mode == "--debug" ? true : false));
+			my_cache.Set_SilentMode((mode == "--silent" ? true : false));
 		}
 	}
 

@@ -30,39 +30,3 @@ enum TraceOp{
 // ---------------
 // EOF
 // ---------------
-
-
-
-//void printCache(){
-//	for (int set = 0; set < NUMSETS; set++){
-//		for (int line = 0; line < ASSOCIATIVITY; line++){
-//			if (valid[set][line] == 1){
-//				cout << "Set: " << set << "Line: " << line << "Tag: " << tag[set][line] << "Dirty bit: " << dirty[set][line] << endl;
-//			}
-//		}
-//	}
-//}
-
-//void updatePLRU(int set, int way){
-//	if (way <= 1)
-//	{
-//		pLRU[set][0] = false;
-//		if (way == 0)
-//		{
-//			pLRU[set][1] = false;
-//		}
-//		else
-//		{
-//			pLRU[set][1] = true;
-//		}
-//	}
-//	else{
-//		pLRU[set][0] = true;
-//		if (way == 2){
-//			pLRU[set][2] = false;
-//		}
-//		else{
-//			pLRU[set][2] = true;
-//		}
-//	}
-//}

@@ -38,8 +38,6 @@ Programming Container:
 	struct array of [index][way]
 
 	struct Tag_Array_Entry{
-	    boolean Valid,
-	    boolean Dirty,
 	    char MESI,
 	    unsigned int Tag
 	}
@@ -78,14 +76,6 @@ Enums:
         MSG_EVICTLINE  = 4
     }
 
-    struct Tag_Array_Entry{
-        bool         Valid,      // Valid bit, data is able to be read or modified
-        bool         Dirty,      // Dirty bit, data has been modified
-        char         MESI,       // 1 hot encoding of the MESI states using 8'b vector
-        unsigned int Tag         // Data tag
-    }
-
-
 Traces:
 	The testbench will read events from a text file of the following format:
 
@@ -109,13 +99,13 @@ Traces:
  	 - main() will error check if the trace file exists, if so, open it and begin reading line by line until eof. 
  	 - For each line in the trace file the operation and address needs to be translated and the appropriate function called
  		- There should be a function for all 9 operations
- 			- L1_Data_Read(unsigned int address, Cache* this)
- 			- L1_Data_Write(unsigned int address, Cache* this)
- 			- L1_Inst_Read(unsigned int address, Cache* this)
- 			- SNP_Invalidate(unsigned int address, Cache* this)
- 			- SNP_Read(unsigned int address, Cache* this)
- 			- SNP_Write(unsigned int address, Cache* this)
- 			- SNP_RWIM(unsigned int address, Cache* this)
+ 			- L1_Data_Read(unsigned int address)
+ 			- L1_Data_Write(unsigned int address)
+ 			- L1_Inst_Read(unsigned int address)
+ 			- SNP_Invalidate(unsigned int address)
+ 			- SNP_Read(unsigned int address)
+ 			- SNP_Write(unsigned int address)
+ 			- SNP_RWIM(unsigned int address)
  			- Clear_Cache()
  			- Print_Cache()
 
@@ -124,7 +114,7 @@ Traces:
  	 	- void BusOperation     // Used to simulate a bus operation and to capture the snoop results of other LLC
  	 	- char GetSnoopResult   // Used to simulate the reporting of snoop results by other caches
  	 	- void PutSnoopResult   // Used to report the result of our snooping bus operations performed by other caches
- 	 	- void MessageToCache   // Used to simulate communication to our upper level cache. ex: L2 eviction "back invalidation"
+ 	 	- void MessageToCache   // Used to simulate communication to our upper level cache.
 
  	 		- Each of these functions have an example stub in the project specification pdf.
  	 		- The print statement styling should be preserved in the switch from C to C++.
@@ -132,7 +122,10 @@ Traces:
 Pseudo-PRLU:
 
 	The same function used in Homework 5 should be updated for 8-way set associativity and added as
-		void update_PLRU(unsigned int Index, unsigned int Way)
+		void update_MRU(unsigned int Index, unsigned int Way)
+
+	The opposite path to set the MRU should be taken to find the LRU.  
+		int find_LRU()
 
 Output:
 
@@ -152,7 +145,7 @@ Output:
 			unsigned int m_CacheHit
 			unsigned int m_CacheMiss
 
-			unsigned int Get_CacheRatio()
+			double Get_CacheRatio()
 			{
 				return (m_CacheHit / (m_CacheHit + m_CacheMiss));
 			}
@@ -160,12 +153,12 @@ Output:
 
 Modes:
 
-	Release and Debug modes. 
-		Release Mode: Simulation will only print to screen responses to a '9' in the trace file and the usage statistics at the completion of the project. 
+	Default and Silent modes. 
+		Silent: Simulation will only print to screen responses to a '9' from the trace file and the usage statistics at the completion of the run. 
 
-		Debug Mode:   Displays everything for Release mode and also bus operations, reported snoop results, and communication messages to higher level cache (L1)
+		Default Mode:   Displays bus operations, reported snoop results, and communication messages to higher level cache (L1)
 
-		Switching between Release and Debug will be achieved through the execution arguments list (argv) 
+		Switching between Default and Silent will be achieved through the execution arguments list (argv) 
 
 
 Bus Operations:
@@ -175,133 +168,7 @@ Bus Operations:
 	- INVALIDATE  // Data was modified, inform next level cache
 	- RWIM        // Read data from next level cache, with snoopability
 
-
-Modeling communication between Lower level cache to next higher level cache:
-
-	- For this project we will refer to the Lower Level Cache (LLC) as L2 and the next higher level cache as L1.
-	- Messages between L1 and L2 are defined as
-		- GETLINE         // Request data for modified line in L1
-		- SENDLINE        // Send requested cache line to L1
-		- INVALIDATELINE  // Invalidate a line in L1
-		- EVICTLINE       // Evict a line from L1
-	- Communication from L1 are operations defined as 0s, 1s, and 2s in the trace file. 
-	- void MessageToCache   // Used to simulate communication to our upper level cache
-	- L1 employs a Write Once Policy. The first write hit to L1 is write through. The subsequent write hits are write back.
-		- If the operation is 1
-			- on a hit,  set Dirty bit for associated tag in L2 to true.
-			- on a miss, 
-				- simulate BusOperation for RWIM, 
-				- set valid==true, 
-				- set dirty==true,
-				- set tag, 
-				- Simulate a SENDLINE
-		- If L2 needs to evict a cache line, and the Dirty bit is true:
-			- simulate a GETLINE
-		  	- simulate a BusOperation for WRITE
-		- If the operation is a 0 or 2
-			- on a hit, simulate a SENDLINE
-			- on a miss,
-				- simulate BusOperation to READ, 
-				- set valid==true, 
-				- set dirty==false,
-				- set tag, 
-				- simulate a SENDLINE
-        
-
-MESI Protocol:
-
-	Snoop Result Types:
-		- NOHIT  // No hit... otherwise officially known as miss
-		- HIT    // Hit
-		- HITM   // Hit on modified line
-
-	- Operations 3, 4, 5, & 6 are snoop operations.
-
-	- For all operations, simualte a HIT, HITM, or NOHIT appropriately
-	- For all operations, update Dirty and Valid bits appropriately
-
-	- For Operation 0 'read request from L1 data cache'
-		- on a hit, stay in current MESI state
-		- on a miss,
-			- simulate BusOperation for READ
-				- if GetSnoopResult returns HITM or HIT update state to S
-					- else update state to E
-	- For Operation 1 'write request from L1 data cache'
-		- on a hit,
-			- state == M
-				- stay in M
-			- state == E
-				- move to M
-			- state == S
-				- move to M
-				- simulate BusOperation for INVALIDATE
-			- state == I
-				- Error State - can't have hit and Invalid
-		- on a miss,
-			- simulate BusOperation for RWIM
-			- move to M (shoulda been in I)
-	- For Operation 2 'read request from L1 instruction cache'
-		- on a hit, stay in current MESI state
-		- on a miss,
-			- simulate BusOperation for READ
-				- if GetSnoopResult returns HITM or HIT update state to S
-					- else update state to E
-	- For Operation 3 'snooped invalidate command'
-		- on a hit,
-			- state == M
-				- Error State - You should have been EXCLUSIVE
-			- state == E
-				- Error State - You should have been EXCLUSIVE
-			- state == S
-				- simulate a HIT
-				- move to I
-				- simulate INVALIDATELINE
-			- state == I
-				- Error State - can't have hit and Invalid
-		- on a miss,
-			- Stay in I, all others are Error States
-	- For Operation 4 'snooped read request'
-		- on a hit,
-			- state == M
-				- simulate a GETLINE
-				- simulate a BusOperation for WRITE
-				- move to S
-			- state == E
-				- move to S
-			- state == S
-				- stay in S
-			- state == I
-				- Error State - can't have hit and Invalid
-		- on a miss,
-			- stay in I
-	- For Operation 5 'snooped write request'
-		- on a hit,
-			- state == M
-				- Error State - You should have been EXCLUSIVE
-			- state == E
-				- Error State - You should have been EXCLUSIVE
-			- state == S
-				- move to I
-			- state == I
-				- Error State - can't have hit and Invalid
-		- on a miss,
-			- stay in I
-	- For Operation 6 'snooped read with intent to modify request'
-		- on a hit,
-			- state == M
-				- simulate a GETLINE
-				- simulate a BusOperation for WRITE
-				- move to I
-			- state == E
-				- move to I
-			- state == S
-				- move to I
-			- state == I
-				- Error State - can't have a hit and Invalid
-		- on a miss,
-			- stay in I
-
-Set Tag:
+Eviction Policy:
 
 	- This cache simulation uses Pseudo Least Recently Used (PLRU) for the eviction policy. 
 	- given an index, on a miss, the Victim will be selected and overwritten with the new tag and control bits
@@ -320,23 +187,19 @@ Combined Cache operations
 			- increment m_CacheMiss
 			- increment m_CacheRead
 			- if required, Evict cache line and send EVICTLINE to L1
-				- if dirty bit is true for victim
+				- if MESI state is 'Modified' for victim
 					- simulate GETLINE
 					- simulate a BusOperation for WRITE
-					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
-			- set valid==true
-			- set dirty==false
 			- set tag
 			- if GetSnoopResult returns HITM or HIT update state to S
-				- else update state to E
+				- else update MESI state to 'Exclusive'
 			- simulate SENDLINE
 
 	- For Operation 1 'write request from L1 data cache'
 		- on a hit,
 			- increment m_CacheHit
 			- increment m_CacheWrite
-			- set dirty=true
 			- state == M
 				- stay in M
 			- state == E
@@ -350,13 +213,10 @@ Combined Cache operations
 			- increment m_CacheMiss
 			- increment m_CacheWrite
 			- if required, Evict cache line and send EVICTLINE to L1
-				- if dirty bit is true for victim
+				- if MESI state is 'Modified' for victim
 					- simulate GETLINE
 					- simulate a BusOperation for WRITE
-					- then continue with the EVICTLINE
 			- simulate BusOperation for RWIM
-			- set valid==true
-			- set dirty==true
 			- set tag
 			- simulate SENDLINE
 			- move to M (shoulda been in I)
@@ -371,13 +231,10 @@ Combined Cache operations
 			- increment m_CacheMiss
 			- increment m_CacheRead
 			- if required, Evict cache line and send EVICTLINE to L1
-				- if dirty bit is true for victim
+				- if MESI state is 'Modified' for victim
 					- simulate GETLINE
 					- simulate a BusOperation for WRITE
-					- then continue with the EVICTLINE
 			- simulate BusOperation for READ
-			- set valid==true
-			- set dirty==false
 			- set tag
 			- if GetSnoopResult returns HITM or HIT update state to S
 				- else update state to E
@@ -392,7 +249,6 @@ Combined Cache operations
 			- state == S
 				- simulate PutSnoopResult for HIT
 				- move to I
-				- set valid==false
 				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
@@ -405,7 +261,6 @@ Combined Cache operations
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
-				- set dirty==false
 				- move to S
 			- state == E
 				- move to S
@@ -425,7 +280,6 @@ Combined Cache operations
 			- state == S
 				- simulate PutSnoopResult for HIT
 				- move to I
-				- set valid==false
 				- simulate INVALIDATELINE
 			- state == I
 				- Error State - can't have hit and Invalid
@@ -438,7 +292,6 @@ Combined Cache operations
 			- state == M
 				- simulate a GETLINE
 				- simulate a BusOperation for WRITE
-				- set valid==false
 				- move to I
 				- simulate INVALIDATELINE
 			- state == E
