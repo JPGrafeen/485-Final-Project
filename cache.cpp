@@ -590,10 +590,13 @@ char Cache::GetSnoopResult(unsigned int Address)
     {
         case 0:
             SnoopResult = 0x01;
+            break;
         case 1:
             SnoopResult = 0x02;
+            break;
         default:
             SnoopResult = 0x00;
+            break;
     }
 
     /*
