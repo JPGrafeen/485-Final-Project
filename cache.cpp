@@ -386,12 +386,12 @@ void Cache::update_MRU(unsigned int Index, unsigned int Way)
     {
         case 0: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 0; break;
         case 1: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 1; break;
-        case 2: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 0; break;
-        case 3: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 1; break;
-        case 4: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 0; break;
-        case 5: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 1; break;
-        case 6: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 0; break;
-        case 7: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 1; break;
+        case 2: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 1; m_pLRU[Index][4] = 0; break;
+        case 3: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 1; m_pLRU[Index][4] = 1; break;
+        case 4: m_pLRU[Index][0] = 1; m_pLRU[Index][2] = 0; m_pLRU[Index][5] = 0; break;
+        case 5: m_pLRU[Index][0] = 1; m_pLRU[Index][2] = 0; m_pLRU[Index][5] = 1; break;
+        case 6: m_pLRU[Index][0] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 0; break;
+        case 7: m_pLRU[Index][0] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 1; break;
     }
 }
 
