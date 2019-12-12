@@ -30,7 +30,6 @@ int Cache::Find_Way(unsigned int Address)
             return ValidWay; 
         }
     }
-a
     return CACHE_MISS;
 }
 
