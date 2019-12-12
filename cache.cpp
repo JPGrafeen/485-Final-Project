@@ -384,14 +384,14 @@ void Cache::update_MRU(unsigned int Index, unsigned int Way)
 {
     switch(Way)
     {
-        case 0: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 0; break;
-        case 1: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 1; break;
-        case 2: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 0; break;
-        case 3: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 1; break;
-        case 4: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 0; break;
-        case 5: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 1; break;
-        case 6: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 0; break;
-        case 7: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 1; break;
+        case 0: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 0; break;    //left -> left -> left      -> way 0
+        case 1: m_pLRU[Index][0] = 0; m_pLRU[Index][1] = 0; m_pLRU[Index][3] = 1; break;    //left -> left -> right     -> way 1
+        case 2: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 0; break;    //left -> right -> left     -> way 2
+        case 3: m_pLRU[Index][0] = 0; m_pLRU[Index][2] = 1; m_pLRU[Index][4] = 1; break;    //left -> right -> right    -> way 3
+        case 4: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 0; break;    //right -> left -> left     -> way 4
+        case 5: m_pLRU[Index][1] = 1; m_pLRU[Index][1] = 0; m_pLRU[Index][5] = 1; break;    //right -> left -> right    -> way 5
+        case 6: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 0; break;    //right -> right -> left    -> way 6
+        case 7: m_pLRU[Index][1] = 1; m_pLRU[Index][2] = 1; m_pLRU[Index][6] = 1; break;    //right -> right -> right   -> way 7
     }
 }
 
@@ -403,53 +403,53 @@ int Cache::find_LRU(unsigned int Index)
 {
     int VictimWay = 0;
 
-    if ( m_pLRU[Index][0] == true )
+    if ( m_pLRU[Index][0] == true )             //left
     {
-        if ( m_pLRU[Index][1] == true )
+        if ( m_pLRU[Index][1] == true )         //left -> left
         {
-            if ( m_pLRU[Index][3] == true )
+            if ( m_pLRU[Index][3] == true )     //left -> left -> left
             {
-                VictimWay = 0;
+                VictimWay = 0;                  //left -> left -> left -> way 0
             }
-            else
+            else                                //left -> left -> right        
             {
-                VictimWay = 1;
+                VictimWay = 1;                  //left -> left -> right -> way 1
             }
         }
-        else
+        else                                    //left -> right
         {
-            if ( m_pLRU[Index][4] == true )
+            if ( m_pLRU[Index][4] == true )     //left -> right -> left
             {
-                VictimWay = 2;
+                VictimWay = 2;                  //left -> right -> left -> way 2
             }
-            else
+            else                                //left ->right -> left
             {
-                VictimWay = 3;
+                VictimWay = 3;                  //left -> right -> left -> way 3
             }
         }
     }
-    else
+    else                                        //right
     {
-        if ( m_pLRU[Index][2] == true )
+        if ( m_pLRU[Index][2] == true )         //right -> left
         {
-            if ( m_pLRU[Index][5] == true )
+            if ( m_pLRU[Index][5] == true )     //right -> left -> left
             {
-                VictimWay = 4;
-            }
-            else
+                VictimWay = 4;                  //right -> left -> left -> way 4
+            }       
+            else                                //right -> left -> right
             {
-                VictimWay = 5;
+                VictimWay = 5;                  //right -> left -> right -> way 5
             }
         }
-        else
+        else                                    //right -> right
         {
-            if ( m_pLRU[Index][6] == true )
+            if ( m_pLRU[Index][6] == true )     //right -> right -> left
             {
-                VictimWay = 6;
+                VictimWay = 6;                  //right -> right -> left -> way 6
             }
-            else
+            else                                //right -> right -> right
             {
-                VictimWay = 7;
+                VictimWay = 7;                  //right -> right -> right -> way 7
             }
         }
     }
