@@ -110,6 +110,7 @@ void Cache::L1_Data_Read(unsigned int Address)
     else
     {
         ++m_CacheHit;
+        update_MRU(Index, VictimWay);
         //Stay in MESI state
     }
 
@@ -138,6 +139,7 @@ void Cache::L1_Data_Write(unsigned int Address)
     else
     {
         ++m_CacheHit;
+        update_MRU(Index, VictimWay);
 
         unsigned int Index = Get_Index(Address);
         if (m_TagArray[Index][VictimWay].MESI == 'S')
@@ -187,6 +189,7 @@ void Cache::L1_Inst_Read(unsigned int Address)
     else
     {
         ++m_CacheHit;
+        update_MRU(Index, VictimWay);
         // Stay in MESI State
     }
 
