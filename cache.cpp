@@ -20,7 +20,7 @@ int Cache::Find_Way(unsigned int Address)
     unsigned int Index = Get_Index(Address);
     unsigned int Tag   = Get_Tag(Address);
 
-    unsigned int ValidWay = 0;
+    int ValidWay = 0;
     for (; ValidWay < CacheAssc; ++ValidWay)
     {
         // If Tag is present and Valid
@@ -30,7 +30,7 @@ int Cache::Find_Way(unsigned int Address)
             return ValidWay; 
         }
     }
-
+a
     return CACHE_MISS;
 }
 
