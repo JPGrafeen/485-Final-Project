@@ -12,7 +12,7 @@
 
 
 //--------------------------------------------------------------------------------
-// Description:  Returns Way if tag exists and is valid. Returns -1 if not found.
+// Description:  Returns Way if tag exists and is valid. Returns CACHE_MISS if not found.
 //
 //--------------------------------------------------------------------------------
 int Cache::Find_Way(unsigned int Address)
@@ -36,7 +36,7 @@ int Cache::Find_Way(unsigned int Address)
 
 //--------------------------------------------------------------------------------
 // Description:  Common Algorithm for bus interaction with Main Memory. Writes 
-//               back if modified and updates the MRU way.
+//               back if modified.
 //
 //               Returns the first invalid Way or the LRU Way.
 //
@@ -66,8 +66,6 @@ int Cache::Process_Line(char BusOp, unsigned int Address, char* SnoopResult)
         MessageToCache(MSG_EVICTLINE, Address);
     }
 
-    update_MRU(Index, VictimWay);
-
     // Read from Main Memory
     BusOperation(BusOp, Address, SnoopResult);
 
@@ -87,12 +85,13 @@ int Cache::Process_Line(char BusOp, unsigned int Address, char* SnoopResult)
 void Cache::L1_Data_Read(unsigned int Address)
 {
     int VictimWay = Find_Way(Address);
+    unsigned int Index = Get_Index(Address);
+
     if (CACHE_MISS == VictimWay)
     {
         ++m_CacheMiss;
 
         char SnoopResult = 0x00;
-        unsigned int Index = Get_Index(Address);
         VictimWay = Process_Line(BUS_READ, Address, &SnoopResult);
 
         if ( SnoopResult == SNP_HIT
@@ -110,11 +109,11 @@ void Cache::L1_Data_Read(unsigned int Address)
     else
     {
         ++m_CacheHit;
-        update_MRU(Index, VictimWay);
         //Stay in MESI state
     }
 
     ++m_CacheRead;
+    update_MRU(Index, VictimWay);
     MessageToCache(MSG_SENDLINE, Address);
 }
 
@@ -139,7 +138,6 @@ void Cache::L1_Data_Write(unsigned int Address)
     else
     {
         ++m_CacheHit;
-        update_MRU(Index, VictimWay);
 
         unsigned int Index = Get_Index(Address);
         if (m_TagArray[Index][VictimWay].MESI == 'S')
@@ -151,6 +149,7 @@ void Cache::L1_Data_Write(unsigned int Address)
 
     ++m_CacheWrite;
     unsigned int Index = Get_Index(Address);
+    update_MRU(Index, VictimWay);
     m_TagArray[Index][VictimWay].MESI  = 'M';
     MessageToCache(MSG_SENDLINE, Address);
 }
@@ -165,13 +164,13 @@ void Cache::L1_Data_Write(unsigned int Address)
 void Cache::L1_Inst_Read(unsigned int Address)
 {
     int VictimWay = Find_Way(Address);
+    unsigned int Index = Get_Index(Address);
 
     if (CACHE_MISS == VictimWay)
     {
         ++m_CacheMiss;
 
         char SnoopResult = 0x00;
-        unsigned int Index = Get_Index(Address);
         VictimWay = Process_Line(BUS_READ, Address, &SnoopResult);
 
         if ( SnoopResult == SNP_HIT
@@ -189,11 +188,11 @@ void Cache::L1_Inst_Read(unsigned int Address)
     else
     {
         ++m_CacheHit;
-        update_MRU(Index, VictimWay);
         // Stay in MESI State
     }
 
     ++m_CacheRead;
+    update_MRU(Index, VictimWay);
     MessageToCache(MSG_SENDLINE, Address);
 }
 
@@ -341,10 +340,8 @@ void Cache::Clear_Cache()
     for (int Index = 0; Index < NofIndex; ++Index)
     {
         for (int Way = 0; Way < CacheAssc; ++Way)
-        {
-            m_TagArray[Index][Way].Tag   = 0x00; //Unecessary as a clear, but needed for initialization. Free as simulation, wouldn't be included in optimized design.
+        {}
             m_TagArray[Index][Way].MESI  = 'I';
-            m_pLRU[Index][Way]           = false;
         }
     }
 
